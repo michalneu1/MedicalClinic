@@ -1,5 +1,9 @@
 package com.medicalclinic;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
 public class MedicalClinicApplication {
     public static void main(String[] args) {
         Patient patient = Patient.builder()
@@ -9,5 +13,7 @@ public class MedicalClinicApplication {
                 .email("jan.kowalski@example.com")
                 .build();
         System.out.println(patient);
+        SpringApplication.run(MedicalClinicApplication.class, args);
+
     }
 }
