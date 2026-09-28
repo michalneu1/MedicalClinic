@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -32,10 +33,23 @@ public class PatientController {
                 .map(patient -> ResponseEntity.ok(patient))
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping(params = "email")
+    public ResponseEntity<Patient> findPatientByEmail(@RequestParam String email) {
+        return patientService.findByEmail(email)
+                .map(patient -> ResponseEntity.ok(patient))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Patient> editPatient(@PathVariable Long id, @RequestBody Patient patient) {
         return patientService.update(id, patient)
+                .map(editedPatient -> ResponseEntity.ok(editedPatient))
+                .orElse(ResponseEntity.notFound().build());
+    }
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<Patient> editPassword(@PathVariable Long id, @RequestBody Map<String,String> patient) {
+        return patientService.updatePassword(id, patient.get("password"))
                 .map(editedPatient -> ResponseEntity.ok(editedPatient))
                 .orElse(ResponseEntity.notFound().build());
     }

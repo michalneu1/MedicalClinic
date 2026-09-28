@@ -62,3 +62,66 @@ Zaczniemy od pytań do nich.
   z `org.springframework.web.bind.annotation`.
 - Po każdej zmianie kodu zrestartuj aplikację; po restarcie lista jest pusta, więc zanim
   sprawdzisz PUT i DELETE, wyślij POST z Anną (dostanie `id` równe 1).
+
+
+### Zadanie 1 (12 min). Wyszukiwanie pacjenta po e-mailu
+Dodaj drugi wariant ścieżki `/patients`: żądanie z parametrem `email` ma zwrócić
+jednego pacjenta, a żądanie bez parametru ma nadal zwracać całą listę. Nie twórz nowej
+ścieżki. W kontrolerze dopisz metodę z warunkiem `params = "email"` i parametrem
+oznaczonym `@RequestParam`. W serwisie dopisz metodę, która oddaje `Optional<Patient>`
+z repozytorium; repozytorium ma już `findByEmail(String)` z lekcji 7.
+
+Brak pacjenta obsłuż tak samo jak przy szukaniu po `id`: status 404 bez body.
+
+Kryteria akceptacji:
+- [ ] `GET /patients` nadal zwraca 200 i całą listę.
+- [ ] `GET /patients?email=anna.nowak@example.com` zwraca 200 i jednego pacjenta.
+- [ ] `GET /patients?email=nikt@example.com` zwraca 404.
+- [ ] W serwisie nie ma liczby 404, a w kontrolerze nie ma pętli po liście pacjentów.
+
+### Zadanie 2 (13 min). Zmiana samego hasła
+Dodaj `PATCH /patients/{id}/password`. Body ma jedno pole:
+
+```json
+{
+  "password": "nowe-haslo-2026"
+}
+```
+
+Odbierz je jako `Map<String, String>` i weź wartość spod klucza `password`. W serwisie
+dopisz metodę, która znajduje pacjenta po `id`, ustawia mu nowe hasło i zwraca go jako
+`Optional<Patient>`. Kontroler zamienia pusty wynik na 404, tak jak w zadaniu 1.
+
+Mapa w body zostaje tylko na tę lekcję i tak ją traktuj: nie buduj na niej niczego
+więcej. W lekcji 10 dostanie własną klasę z nazwą, która mówi, o co prosi klient.
+
+Kryteria akceptacji:
+- [ ] `PATCH /patients/1/password` zwraca 200, a w odpowiedzi jest nowe hasło.
+- [ ] `GET /patients/1` pokazuje to samo nowe hasło, a pozostałe pola są bez zmian.
+- [ ] `PATCH /patients/99/password` zwraca 404.
+- [ ] Ścieżka kończy się rzeczownikiem `password`, a nie czasownikiem.
+
+### Zadanie 3 (5 min). Oba nowe żądania w kolekcji
+Załóż w kolekcji Bruno folder `pacjenci` i zapisz w nim dwa dzisiejsze żądania:
+wyszukiwanie po e-mailu i zmianę hasła. Resztę CRUD-a dołożysz w pracy domowej.
+
+Kryteria akceptacji:
+- [ ] Folder `pacjenci` jest w repozytorium, w katalogu `bruno`.
+- [ ] Każde żądanie używa `{{baseUrl}}`, a nie wpisanego na sztywno adresu.
+- [ ] Oba żądania wysłane z Bruno zwracają 200 dla pacjenta o `id` równym 1.
+
+## Jak sprawdzisz, że skończyłeś
+
+- `POST /patients` (Anna) → 201, `"id": 1`
+- `GET /patients` → 200, tablica z jednym pacjentem
+- `GET /patients?email=anna.nowak@example.com` → 200, jeden pacjent
+- `GET /patients?email=nikt@example.com` → 404
+- `PATCH /patients/1/password` → 200, nowe hasło w odpowiedzi
+- `PATCH /patients/99/password` → 404
+- `PUT /patients/1` → 200 (tego nie ruszałeś)
+- `DELETE /patients/1` → 204
+
+
+
+
+

@@ -23,6 +23,10 @@ public class PatientService {
         return repository.findById(id);
     }
 
+    public Optional<Patient> findByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
     public Patient create(Patient patient) {
         if (repository.findByEmail(patient.getEmail()).isPresent()) {
             throw new PatientAlreadyExistsException();
@@ -47,6 +51,13 @@ public class PatientService {
 
     public boolean deleteById(Long id) {
         return repository.deleteById(id);
+    }
+
+    public Optional<Patient> updatePassword(Long id, String password) {
+        return repository.findById(id).map(existing -> {
+            existing.setPassword(password);
+            return existing;
+        });
     }
 
 
