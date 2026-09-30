@@ -37,6 +37,7 @@ public class PatientService {
     }
 
     public PatientDto create(PatientCreateCommand command) {
+        //Business validation repository must be checked if email already exist
         if (repository.findByEmail(command.email()).isPresent()) {
             throw new PatientAlreadyExistsException();
         }
