@@ -1,4 +1,10 @@
 package com.medicalclinic.dto;
 
-public record EditPasswordCommand(String password) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record EditPasswordCommand(
+        @NotBlank
+        @Size(min = 8)
+        String password) {
 }
