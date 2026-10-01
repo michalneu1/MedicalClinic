@@ -61,4 +61,11 @@ public class GlobalExceptionHandler {
         log.warn("Mismatch {}", exception.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "parameter " + exception.getName() + " has invalid type");
     }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnknownError(Exception exception) {
+        log.error("Unexpected error ", exception);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,  "Unknown error ");
+    }
+
 }
