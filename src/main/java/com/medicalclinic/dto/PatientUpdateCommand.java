@@ -8,16 +8,17 @@ import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 
 public record PatientUpdateCommand(
-        @NotBlank
-        @Email
+        @NotBlank(message = "email is required")
+        @Email(message = "email must be a valid email address")
         String email,
-        @NotBlank
+        @NotBlank(message = "first name is required")
         String firstName,
-        @NotBlank
+        @NotBlank(message = "last name is required")
         String lastName,
-        @Pattern(regexp = "\\d{9}")
+        @NotBlank(message = "phone number is required")
+        @Pattern(regexp = "\\d{9}", message = "phone number must be exactly 9 digits")
         String phoneNumber,
-        @Past
+        @Past(message = "birthday must be a date in the past")
         LocalDate birthday
 ) {
 }
