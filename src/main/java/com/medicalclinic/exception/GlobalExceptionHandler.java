@@ -1,6 +1,5 @@
 package com.medicalclinic.exception;
 
-
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.HttpStatus;
@@ -29,16 +28,26 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidation(MethodArgumentNotValidException exception) {
-        List<Map<String, String>> errors = exception.getFieldErrors().stream()
-                .sorted(Comparator.comparing(FieldError::getField))
-                .map(error -> {
-                    Map<String, String> pozycja = new LinkedHashMap<>();
-                    pozycja.put("field", error.getField());
-                    pozycja.put("message", String.valueOf(error.getDefaultMessage()));
-                    return pozycja;
-                })
-                .toList();
+        List<Map<String, String>> errors = collectFieldErrors(exception);
         log.warn("Validation failed: {}", errors.size());
+        return buildValidationProblem(errors);
+    }
+
+    private List<Map<String, String>> collectFieldErrors(MethodArgumentNotValidException exception) {
+        return exception.getFieldErrors().stream()
+                .sorted(Comparator.comparing(FieldError::getField))
+                .map(this::toErrorEntry)
+                .toList();
+    }
+
+    private Map<String, String> toErrorEntry(FieldError error) {
+        Map<String, String> entry = new LinkedHashMap<>();
+        entry.put("field", error.getField());
+        entry.put("message", String.valueOf(error.getDefaultMessage()));
+        return entry;
+    }
+
+    private ProblemDetail buildValidationProblem(List<Map<String, String>> errors) {
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed");
         problem.setProperty("errors", errors);
         return problem;
@@ -46,26 +55,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleUnreadable(HttpMessageNotReadableException exception) {
-        log.warn("Unreadable body {}", exception.getMessage());
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "request body is not valid JSON");
+        log.warn("Unreadable body: {}", exception.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Request body is not valid JSON");
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ProblemDetail handleNoRoute(NoResourceFoundException exception) {
-        log.warn("no route {}", exception.getMessage());
-        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "no such endpoint");
+        log.warn("No route: {}", exception.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "No such endpoint");
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ProblemDetail handleMismatch(MethodArgumentTypeMismatchException exception) {
-        log.warn("Mismatch {}", exception.getMessage());
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "parameter " + exception.getName() + " has invalid type");
+        log.warn("Type mismatch: {}", exception.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Parameter " + exception.getName() + " has invalid type");
     }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleUnknownError(Exception exception) {
-        log.error("Unexpected error ", exception);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,  "Unknown error ");
+        log.error("Unexpected error", exception);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown error");
     }
-
 }
