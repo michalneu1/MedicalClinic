@@ -1,6 +1,11 @@
 package com.medicalclinic.service;
 
+import com.medicalclinic.dto.PatientCreateCommand;
+import com.medicalclinic.dto.PatientDto;
+import com.medicalclinic.dto.PatientUpdateCommand;
 import com.medicalclinic.exception.PatientAlreadyExistsException;
+import com.medicalclinic.exception.PatientNotFoundException;
+import com.medicalclinic.mapper.PatientMapper;
 import com.medicalclinic.model.Patient;
 import com.medicalclinic.repository.InMemoryPatientRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,51 +18,55 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PatientService {
     private final InMemoryPatientRepository repository;
+    private final PatientMapper patientMapper;
 
 
-    public List<Patient> findAll() {
-        return repository.findAll();
+    public List<PatientDto> findAll() {
+        return repository.findAll().stream()
+                .map(patientMapper::toDto)
+                .toList();
     }
 
-    public Optional<Patient> findById(Long id) {
-        return repository.findById(id);
+    public PatientDto findById(Long id) {
+        return repository.findById(id)
+                .map(patientMapper::toDto)
+                .orElseThrow(()-> new PatientNotFoundException(id));
     }
 
-    public Optional<Patient> findByEmail(String email) {
-        return repository.findByEmail(email);
+    public PatientDto findByEmail(String email) {
+        return repository.findByEmail(email)
+                .map(patientMapper::toDto)
+                .orElseThrow(()-> new PatientNotFoundException(email));
     }
 
-    public Patient create(Patient patient) {
-        if (repository.findByEmail(patient.getEmail()).isPresent()) {
+    public PatientDto create(PatientCreateCommand command) {
+        //Business validation repository must be checked if email already exist
+        if (repository.findByEmail(command.email()).isPresent()) {
             throw new PatientAlreadyExistsException();
         }
-        return repository.save(patient);
-
+        Patient patient = patientMapper.toEntity(command);
+        return patientMapper.toDto(repository.save(patient));
     }
 
-    public Optional<Patient> update(Long id, Patient newData) {
+    public PatientDto update(Long id, PatientUpdateCommand newData) {
         return repository.findById(id)
                 .map(existing -> {
-                    existing.setEmail(newData.getEmail());
-                    existing.setPassword(newData.getPassword());
-                    existing.setIdCardNo(newData.getIdCardNo());
-                    existing.setFirstName(newData.getFirstName());
-                    existing.setLastName(newData.getLastName());
-                    existing.setPhoneNumber(newData.getPhoneNumber());
-                    existing.setBirthday(newData.getBirthday());
-                    return existing;
-                });
+                    patientMapper.updateEntity(newData, existing);
+                    return patientMapper.toDto(existing);
+                }).orElseThrow(()-> new PatientNotFoundException(id));
     }
 
-    public boolean deleteById(Long id) {
-        return repository.deleteById(id);
+    public void deleteById(Long id) {
+        if (!repository.deleteById(id)) {
+            throw new PatientNotFoundException(id);
+        }
     }
 
-    public Optional<Patient> updatePassword(Long id, String password) {
+    public PatientDto updatePassword(Long id, String password) {
         return repository.findById(id).map(existing -> {
             existing.setPassword(password);
-            return existing;
-        });
+            return patientMapper.toDto(existing);
+        }).orElseThrow(()-> new PatientNotFoundException(id));
     }
 
 
