@@ -1,5 +1,6 @@
 package com.medicalclinic.repository;
 
+import com.medicalclinic.exception.PatientAlreadyExistsException;
 import com.medicalclinic.model.Patient;
 import org.springframework.stereotype.Repository;
 
@@ -15,10 +16,6 @@ public class InMemoryPatientRepository {
 
     public List<Patient> findAll() {
         return List.copyOf(list);
-    }
-
-    public void createPatient(Patient patient) {
-        list.add(patient);
     }
 
     public Optional<Patient> findById(Long id) {
