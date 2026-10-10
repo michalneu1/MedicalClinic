@@ -4,6 +4,7 @@ import com.medicalclinic.dto.PatientCreateCommand;
 import com.medicalclinic.dto.PatientDto;
 import com.medicalclinic.dto.PatientUpdateCommand;
 import com.medicalclinic.exception.PatientAlreadyExistsException;
+import com.medicalclinic.exception.PatientNotFoundException;
 import com.medicalclinic.mapper.PatientMapper;
 import com.medicalclinic.model.Patient;
 import com.medicalclinic.repository.InMemoryPatientRepository;
@@ -26,17 +27,20 @@ public class PatientService {
                 .toList();
     }
 
-    public Optional<PatientDto> findById(Long id) {
+    public PatientDto findById(Long id) {
         return repository.findById(id)
-                .map(patientMapper::toDto);
+                .map(patientMapper::toDto)
+                .orElseThrow(()-> new PatientNotFoundException(id));
     }
 
-    public Optional<PatientDto> findByEmail(String email) {
+    public PatientDto findByEmail(String email) {
         return repository.findByEmail(email)
-                .map(patientMapper::toDto);
+                .map(patientMapper::toDto)
+                .orElseThrow(()-> new PatientNotFoundException(email));
     }
 
     public PatientDto create(PatientCreateCommand command) {
+        //Business validation repository must be checked if email already exist
         if (repository.findByEmail(command.email()).isPresent()) {
             throw new PatientAlreadyExistsException();
         }
@@ -44,23 +48,25 @@ public class PatientService {
         return patientMapper.toDto(repository.save(patient));
     }
 
-    public Optional<PatientDto> update(Long id, PatientUpdateCommand newData) {
+    public PatientDto update(Long id, PatientUpdateCommand newData) {
         return repository.findById(id)
                 .map(existing -> {
                     patientMapper.updateEntity(newData, existing);
                     return patientMapper.toDto(existing);
-                });
+                }).orElseThrow(()-> new PatientNotFoundException(id));
     }
 
-    public boolean deleteById(Long id) {
-        return repository.deleteById(id);
+    public void deleteById(Long id) {
+        if (!repository.deleteById(id)) {
+            throw new PatientNotFoundException(id);
+        }
     }
 
-    public Optional<PatientDto> updatePassword(Long id, String password) {
+    public PatientDto updatePassword(Long id, String password) {
         return repository.findById(id).map(existing -> {
             existing.setPassword(password);
             return patientMapper.toDto(existing);
-        });
+        }).orElseThrow(()-> new PatientNotFoundException(id));
     }
 
 
