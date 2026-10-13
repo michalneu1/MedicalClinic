@@ -12,13 +12,15 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR)
 public interface PatientMapper {
 
+    @Mapping(target = "email", source = "user.email")
     PatientDto toDto(Patient patient);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
     Patient toEntity(PatientCreateCommand command);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "idCardNo", ignore = true)
-    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "user", ignore = true)
     void updateEntity(PatientUpdateCommand command, @MappingTarget Patient patient);
 }
