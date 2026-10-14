@@ -6,6 +6,7 @@ import com.medicalclinic.exception.UserAlreadyExistsException;
 import com.medicalclinic.exception.UserInUseException;
 import com.medicalclinic.exception.UserNotFoundException;
 import com.medicalclinic.mapper.UserMapper;
+import com.medicalclinic.repository.DoctorRepository;
 import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final PatientRepository patientRepository;
+    private final DoctorRepository doctorRepository;
     private final UserMapper userMapper;
 
     public List<UserDto> findAll() {
@@ -43,7 +45,7 @@ public class UserService {
         if (!userRepository.existsById(id)) {
             throw new UserNotFoundException(id);
         }
-        if (patientRepository.existsByUserId(id)) {
+        if (patientRepository.existsByUserId(id) || doctorRepository.existsByUserId(id)) {
             throw new UserInUseException(id);
         }
         userRepository.deleteById(id);
