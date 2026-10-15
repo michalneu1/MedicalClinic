@@ -5,11 +5,14 @@ import com.medicalclinic.dto.doctor.DoctorDto;
 import com.medicalclinic.exception.DoctorAlreadyExistsException;
 import com.medicalclinic.exception.DoctorHasVisitsException;
 import com.medicalclinic.exception.DoctorNotFoundException;
+import com.medicalclinic.exception.FacilityNotFoundException;
 import com.medicalclinic.exception.UserNotFoundException;
 import com.medicalclinic.mapper.DoctorMapper;
 import com.medicalclinic.model.Doctor;
+import com.medicalclinic.model.Facility;
 import com.medicalclinic.model.User;
 import com.medicalclinic.repository.DoctorRepository;
+import com.medicalclinic.repository.FacilityRepository;
 import com.medicalclinic.repository.UserRepository;
 import com.medicalclinic.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ public class DoctorService {
     private final DoctorRepository doctorRepository;
     private final UserRepository userRepository;
     private final VisitRepository visitRepository;
+    private final FacilityRepository facilityRepository;
     private final DoctorMapper doctorMapper;
 
     public List<DoctorDto> findAll() {
@@ -59,5 +63,29 @@ public class DoctorService {
             throw new DoctorHasVisitsException(id);
         }
         doctorRepository.deleteById(id);
+    }
+
+    public DoctorDto assignFacility(Long id, Long facilityId) {
+        Doctor doctor = findDoctor(id);
+        Facility facility = findFacility(facilityId);
+        doctor.addFacility(facility);
+        return doctorMapper.toDto(doctorRepository.save(doctor));
+    }
+
+    public DoctorDto unassignFacility(Long id, Long facilityId) {
+        Doctor doctor = findDoctor(id);
+        Facility facility = findFacility(facilityId);
+        doctor.removeFacility(facility);
+        return doctorMapper.toDto(doctorRepository.save(doctor));
+    }
+
+    private Doctor findDoctor(Long id) {
+        return doctorRepository.findById(id)
+                .orElseThrow(() -> new DoctorNotFoundException(id));
+    }
+
+    private Facility findFacility(Long id) {
+        return facilityRepository.findById(id)
+                .orElseThrow(() -> new FacilityNotFoundException(id));
     }
 }

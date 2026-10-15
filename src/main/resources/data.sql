@@ -19,3 +19,9 @@ VALUES ('katarzyna.wrobel@example.com', 'haslo123', 'DOCTOR')
 INSERT INTO doctors (user_id, first_name, last_name, specialization)
 VALUES ((SELECT id FROM users WHERE email = 'katarzyna.wrobel@example.com'), 'Katarzyna', 'Wróbel', 'CARDIOLOGIST')
     ON CONFLICT DO NOTHING;
+
+INSERT INTO facilities (name, city, zip_code, street, number)
+VALUES
+('Przychodnia Centrum',    'Kraków', '31-001', 'Rynek Główny',    '1'),
+('Przychodnia Nowa Huta',  'Kraków', '31-900', 'Plac Centralny',  '1')
+    ON CONFLICT DO NOTHING;

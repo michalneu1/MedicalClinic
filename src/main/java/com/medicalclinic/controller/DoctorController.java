@@ -83,4 +83,30 @@ public class DoctorController {
     public void deleteById(@PathVariable Long id) {
         doctorService.deleteById(id);
     }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Facility assigned"),
+            @ApiResponse(responseCode = "404",
+                    description = "Doctor or facility not found",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class)))
+    })
+    @Operation(summary = "Assign facility to doctor")
+    @PostMapping("/{id}/facilities/{facilityId}")
+    public DoctorDto assignFacility(@PathVariable Long id, @PathVariable Long facilityId) {
+        return doctorService.assignFacility(id, facilityId);
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Facility unassigned"),
+            @ApiResponse(responseCode = "404",
+                    description = "Doctor or facility not found",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class)))
+    })
+    @Operation(summary = "Unassign facility from doctor")
+    @DeleteMapping("/{id}/facilities/{facilityId}")
+    public DoctorDto unassignFacility(@PathVariable Long id, @PathVariable Long facilityId) {
+        return doctorService.unassignFacility(id, facilityId);
+    }
 }
