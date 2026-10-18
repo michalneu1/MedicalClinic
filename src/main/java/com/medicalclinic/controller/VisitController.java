@@ -3,7 +3,6 @@ package com.medicalclinic.controller;
 import com.medicalclinic.dto.PatientDto;
 import com.medicalclinic.dto.visit.VisitCreateCommand;
 import com.medicalclinic.dto.visit.VisitDto;
-import com.medicalclinic.model.Visit;
 import com.medicalclinic.service.VisitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

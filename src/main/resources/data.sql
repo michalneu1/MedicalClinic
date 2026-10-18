@@ -25,3 +25,8 @@ VALUES
 ('Przychodnia Centrum',    'Kraków', '31-001', 'Rynek Główny',    '1'),
 ('Przychodnia Nowa Huta',  'Kraków', '31-900', 'Plac Centralny',  '1')
     ON CONFLICT DO NOTHING;
+
+INSERT INTO patients (user_id, id_card_no, first_name, last_name)
+VALUES
+((SELECT id FROM users WHERE email = 'katarzyna.wrobel@example.com'), 'KLM222333', 'Katarzyna', 'Wróbel')
+    ON CONFLICT (user_id) DO NOTHING;
