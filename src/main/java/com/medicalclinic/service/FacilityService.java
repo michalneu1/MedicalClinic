@@ -8,6 +8,7 @@ import com.medicalclinic.mapper.FacilityMapper;
 import com.medicalclinic.repository.FacilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,18 +18,21 @@ public class FacilityService {
     private final FacilityRepository facilityRepository;
     private final FacilityMapper facilityMapper;
 
+    @Transactional(readOnly = true)
     public List<FacilityDto> findAll() {
         return facilityRepository.findAll().stream()
                 .map(facilityMapper::toDto)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public FacilityDto findById(Long id) {
         return facilityRepository.findById(id)
                 .map(facilityMapper::toDto)
                 .orElseThrow(() -> new FacilityNotFoundException(id));
     }
 
+    @Transactional
     public FacilityDto create(FacilityCreateCommand command) {
         if (facilityRepository.existsByName(command.name())) {
             throw new FacilityAlreadyExistsException(command.name());

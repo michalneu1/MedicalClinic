@@ -47,6 +47,23 @@ public class VisitController {
         return visitService.create(command);
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Visit booked"),
+            @ApiResponse(responseCode = "404",
+                    description = "Visit or patient not found",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409",
+                    description = "Visit already booked",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class)))
+    })
+    @Operation(summary = "Book visit for patient")
+    @PatchMapping("/{visitId}/book/{patientId}")
+    public VisitDto book(@PathVariable Long visitId, @PathVariable Long patientId) {
+        return visitService.book(visitId, patientId);
+    }
+
 
     @GetMapping(params = "doctorId")
     public List<VisitDto> findByDoctorId(@RequestParam Long doctorId) {

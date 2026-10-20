@@ -2,6 +2,8 @@ package com.medicalclinic.controller;
 
 import com.medicalclinic.dto.doctor.DoctorCreateCommand;
 import com.medicalclinic.dto.doctor.DoctorDto;
+import com.medicalclinic.dto.doctor.SubstitutionCommand;
+import com.medicalclinic.dto.visit.VisitDto;
 import com.medicalclinic.service.DoctorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -82,6 +84,27 @@ public class DoctorController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteById(@PathVariable Long id) {
         doctorService.deleteById(id);
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Visits moved to substitute"),
+            @ApiResponse(responseCode = "400",
+                    description = "Request body is not valid",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Doctor or substitute not found",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409",
+                    description = "Substitute already has a visit in this time slot",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class)))
+    })
+    @Operation(summary = "Move all doctor's visits to substitute")
+    @PostMapping("/{id}/substitutions")
+    public List<VisitDto> substitute(@PathVariable Long id, @Valid @RequestBody SubstitutionCommand command) {
+        return doctorService.substitute(id, command);
     }
 
     @ApiResponses({

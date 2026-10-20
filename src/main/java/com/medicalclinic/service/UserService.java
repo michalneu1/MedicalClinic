@@ -11,6 +11,7 @@ import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,18 +23,21 @@ public class UserService {
     private final DoctorRepository doctorRepository;
     private final UserMapper userMapper;
 
+    @Transactional(readOnly = true)
     public List<UserDto> findAll() {
         return userRepository.findAll().stream()
                 .map(userMapper::toDto)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public UserDto findById(Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toDto)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
+    @Transactional
     public UserDto create(UserCreateCommand command) {
         if (userRepository.existsByEmail(command.email())) {
             throw new UserAlreadyExistsException(command.email());
@@ -41,6 +45,7 @@ public class UserService {
         return userMapper.toDto(userRepository.save(userMapper.toEntity(command)));
     }
 
+    @Transactional
     public void deleteById(Long id) {
         if (!userRepository.existsById(id)) {
             throw new UserNotFoundException(id);

@@ -30,4 +30,6 @@ public class Visit {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patient patient;
+    @Version
+    private Long version;
 }

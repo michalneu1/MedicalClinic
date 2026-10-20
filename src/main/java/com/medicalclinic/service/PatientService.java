@@ -11,9 +11,9 @@ import com.medicalclinic.model.Role;
 import com.medicalclinic.model.User;
 import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,19 +25,21 @@ public class PatientService {
     private final UserRepository userRepository;
     private final PatientMapper patientMapper;
 
-
+    @Transactional(readOnly = true)
     public List<PatientDto> findAll() {
         return patientRepository.findAll().stream()
                 .map(patientMapper::toDto)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public PatientDto findById(Long id) {
         return patientRepository.findById(id)
                 .map(patientMapper::toDto)
                 .orElseThrow(() -> new PatientNotFoundException(id));
     }
 
+    @Transactional(readOnly = true)
     public PatientDto findByEmail(String email) {
         return patientRepository.findByUserEmail(email)
                 .map(patientMapper::toDto)
@@ -60,14 +62,16 @@ public class PatientService {
         return patientMapper.toDto(patientRepository.save(patient));
     }
 
+    @Transactional
     public PatientDto update(Long id, PatientUpdateCommand newData) {
         return patientRepository.findById(id)
                 .map(existing -> {
                     patientMapper.updateEntity(newData, existing);
-                    return patientMapper.toDto(patientRepository.save(existing));
+                    return patientMapper.toDto(existing);
                 }).orElseThrow(() -> new PatientNotFoundException(id));
     }
 
+    @Transactional
     public void deleteById(Long id) {
         if (!patientRepository.existsById(id)) {
             throw new PatientNotFoundException(id);
@@ -84,6 +88,7 @@ public class PatientService {
         return patientMapper.toDto(patient);
     }
 
+    @Transactional(readOnly = true)
     public List<PatientDto> searchByFragment(String fragment) {
         return patientRepository.searchByNameFragment(fragment).stream()
                 .map(patientMapper::toDto)
