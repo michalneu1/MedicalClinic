@@ -34,6 +34,10 @@ public class VisitController {
             @ApiResponse(responseCode = "404",
                     description = "Doctor not found",
                     content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409",
+                    description = "Visit overlaps an existing one",
+                    content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class)))
     })
     @Operation(summary = "Add free visit slot")
