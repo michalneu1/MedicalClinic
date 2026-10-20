@@ -11,3 +11,11 @@ VALUES
 ((SELECT id FROM users WHERE email = 'anna.nowak@example.com'),      'DEF654321', 'Anna',  'Nowak',     '500300400', '1990-07-01'),
 ((SELECT id FROM users WHERE email = 'piotr.zielinski@example.com'), 'GHI112233', 'Piotr', 'Zieliński', NULL,        '1978-11-23')
     ON CONFLICT DO NOTHING;
+
+INSERT INTO users (email, password, role)
+VALUES ('katarzyna.wrobel@example.com', 'haslo123', 'DOCTOR')
+    ON CONFLICT DO NOTHING;
+
+INSERT INTO doctors (user_id, first_name, last_name, specialization)
+VALUES ((SELECT id FROM users WHERE email = 'katarzyna.wrobel@example.com'), 'Katarzyna', 'Wróbel', 'CARDIOLOGIST')
+    ON CONFLICT DO NOTHING;
