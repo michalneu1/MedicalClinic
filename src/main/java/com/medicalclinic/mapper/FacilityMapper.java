@@ -13,6 +13,5 @@ public interface FacilityMapper {
     FacilityDto toDto(Facility facility);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "doctors", ignore = true)
     Facility toEntity(FacilityCreateCommand command);
 }

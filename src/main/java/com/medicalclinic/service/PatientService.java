@@ -50,11 +50,11 @@ public class PatientService {
         if (userRepository.existsByEmail(command.email())) {
             throw new PatientAlreadyExistsException();
         }
-        User user = userRepository.save(User.builder()
+        User user = User.builder()
                 .email(command.email())
                 .password(command.password())
                 .role(Role.PATIENT)
-                .build());
+                .build();
         Patient patient = patientMapper.toEntity(command);
         patient.setUser(user);
         return patientMapper.toDto(patientRepository.save(patient));

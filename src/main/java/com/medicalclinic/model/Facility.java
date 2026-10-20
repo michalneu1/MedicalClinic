@@ -3,10 +3,9 @@ package com.medicalclinic.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +22,4 @@ public class Facility {
     private String zipCode;
     private String street;
     private String number;
-    @ManyToMany(mappedBy = "facilities", fetch = FetchType.LAZY)
-    @EqualsAndHashCode.Exclude
-    private Set<Doctor> doctors = new HashSet<>();
 }
