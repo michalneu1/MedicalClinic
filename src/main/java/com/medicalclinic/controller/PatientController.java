@@ -89,6 +89,13 @@ public class PatientController {
         return patientService.findByEmail(email);
     }
 
+    @ApiResponse(responseCode = "200", description = "Returns matching patients")
+    @Operation(summary = "Search patients by first or last name fragment")
+    @GetMapping(params = "fragment")
+    public List<PatientDto> searchByFragment(@RequestParam String fragment) {
+        return patientService.searchByFragment(fragment);
+    }
+
     @ApiResponses({
             @ApiResponse(responseCode = "200",description = "Patient updated"),
             @ApiResponse(responseCode = "400",
