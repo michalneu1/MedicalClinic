@@ -1,19 +1,26 @@
 package com.medicalclinic;
 
+import com.medicalclinic.notification.VisitReminderService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @SpringBootApplication
 public class MedicalClinicApplication {
     public static void main(String[] args) {
-        Patient patient = Patient.builder()
-                .id(1)
-                .firstName("Jan")
-                .lastName("Kowalski")
-                .email("jan.kowalski@example.com")
-                .build();
-        System.out.println(patient);
-        SpringApplication.run(MedicalClinicApplication.class, args);
+        var context = SpringApplication.run(MedicalClinicApplication.class, args);
+
+//        context.getBean(VisitReminderService.class).remind("anna.kowalska@example.com");
+
+//        String[] names = context.getBeanDefinitionNames();
+//        Arrays.sort(names);
+//        for (String name : names) {
+//            System.out.println(name);
+//        }
+
 
     }
 }
