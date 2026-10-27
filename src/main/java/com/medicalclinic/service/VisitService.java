@@ -51,6 +51,9 @@ public class VisitService {
     public VisitDto book(Long visitId, Long patientId) {
         Visit visit = visitRepository.findById(visitId)
                 .orElseThrow(() -> new VisitNotFoundException(visitId));
+        if (visit.getStartsAt().isBefore(LocalDateTime.now(clock))) {
+            throw new InvalidVisitException("Visit in the past cannot be booked");
+        }
         if (visit.getPatient() != null) {
             throw new VisitAlreadyBookedException(visitId);
         }
