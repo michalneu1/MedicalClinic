@@ -7,6 +7,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -65,7 +66,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ProblemDetail handleUnreadable(HttpMessageNotReadableException exception) {
         log.warn("Unreadable body: {}", exception.getMessage());
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Request body is not valid JSON");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "request body is not valid JSON");
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ProblemDetail handleMethodNotSupported(HttpRequestMethodNotSupportedException exception) {
+        log.warn("Method not supported: {}", exception.getMethod());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.METHOD_NOT_ALLOWED,
+                "method " + exception.getMethod() + " is not supported here");
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
