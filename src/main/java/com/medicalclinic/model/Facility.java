@@ -22,4 +22,16 @@ public class Facility {
     private String zipCode;
     private String street;
     private String number;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Facility other)) return false;
+        return id != null && id.equals(other.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Facility.class.hashCode();
+    }
 }

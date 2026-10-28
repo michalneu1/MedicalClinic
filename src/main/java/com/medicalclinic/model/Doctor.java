@@ -43,6 +43,16 @@ public class Doctor {
         facilities.remove(facility);
     }
 
-}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Doctor other)) return false;
+        return id != null && id.equals(other.getId());
+    }
 
+    @Override
+    public int hashCode() {
+        return Doctor.class.hashCode();
+    }
+}
 
