@@ -16,6 +16,8 @@ import com.medicalclinic.repository.DoctorRepository;
 import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,6 +76,11 @@ public class VisitService {
         if (duration.isNegative() || duration.isZero() || duration.toSeconds() % 900 != 0) {
             throw new InvalidVisitException("Visit length must be a positive multiple of 15 minutes");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<VisitDto> findAll(Pageable pageable) {
+        return visitRepository.findAll(pageable).map(visitMapper::toDto);
     }
 
     @Transactional(readOnly = true)

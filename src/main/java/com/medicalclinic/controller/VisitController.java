@@ -1,6 +1,6 @@
 package com.medicalclinic.controller;
 
-import com.medicalclinic.dto.PatientDto;
+import com.medicalclinic.dto.PageResponse;
 import com.medicalclinic.dto.visit.VisitCreateCommand;
 import com.medicalclinic.dto.visit.VisitDto;
 import com.medicalclinic.service.VisitService;
@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +67,13 @@ public class VisitController {
         return visitService.book(visitId, patientId);
     }
 
+
+    @Operation(summary = "List visits page by page")
+    @GetMapping
+    public PageResponse<VisitDto> findAll(
+            @PageableDefault(size = 20, sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable) {
+        return PageResponse.from(visitService.findAll(pageable));
+    }
 
     @GetMapping(params = "doctorId")
     public List<VisitDto> findByDoctorId(@RequestParam Long doctorId) {
