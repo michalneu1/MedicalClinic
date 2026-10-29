@@ -2,12 +2,7 @@ package com.medicalclinic.service;
 
 import com.medicalclinic.dto.visit.VisitCreateCommand;
 import com.medicalclinic.dto.visit.VisitDto;
-import com.medicalclinic.exception.DoctorNotFoundException;
-import com.medicalclinic.exception.InvalidVisitException;
-import com.medicalclinic.exception.PatientNotFoundException;
-import com.medicalclinic.exception.VisitAlreadyBookedException;
-import com.medicalclinic.exception.VisitNotFoundException;
-import com.medicalclinic.exception.VisitOverlapsException;
+import com.medicalclinic.exception.*;
 import com.medicalclinic.mapper.VisitMapper;
 import com.medicalclinic.model.Doctor;
 import com.medicalclinic.model.Patient;
@@ -16,16 +11,20 @@ import com.medicalclinic.repository.DoctorRepository;
 import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VisitService {
@@ -34,19 +33,25 @@ public class VisitService {
     private final PatientRepository patientRepository;
     private final VisitMapper visitMapper;
     private final Clock clock;
+    private static final List<String> SORTABLE_FIELDS = List.of("startsAt", "endsAt");
 
     @Transactional
     public VisitDto create(VisitCreateCommand command) {
         validateTime(command.startsAt(), command.endsAt());
         Doctor doctor = doctorRepository.findById(command.doctorId())
                 .orElseThrow(() -> new DoctorNotFoundException(command.doctorId()));
+        log.debug("checking overlapping visits of doctor {} between {} and {}",
+                command.doctorId(), command.startsAt(), command.endsAt());
         if (visitRepository.existsByDoctorIdAndStartsAtBeforeAndEndsAtAfter(
                 command.doctorId(), command.endsAt(), command.startsAt())) {
             throw new VisitOverlapsException();
         }
         Visit visit = visitMapper.toEntity(command);
         visit.setDoctor(doctor);
-        return visitMapper.toDto(visitRepository.save(visit));
+        Visit saved = visitRepository.save(visit);
+        log.info("created visit {} for doctor {} from {} to {}",
+                saved.getId(), doctor.getId(), saved.getStartsAt(), saved.getEndsAt());
+        return visitMapper.toDto(saved);
     }
 
     @Transactional
@@ -62,6 +67,7 @@ public class VisitService {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new PatientNotFoundException(patientId));
         visit.setPatient(patient);
+        log.info("booked visit {} for patient {}", visitId, patientId);
         return visitMapper.toDto(visit);
     }
 
@@ -79,8 +85,18 @@ public class VisitService {
     }
 
     @Transactional(readOnly = true)
-    public Page<VisitDto> findAll(Pageable pageable) {
-        return visitRepository.findAll(pageable).map(visitMapper::toDto);
+    public Page<Visit> findAll(Pageable pageable) {
+        validateSort(pageable.getSort());
+        return visitRepository.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public long countFreeSlots(Long doctorId, LocalDate day) {
+        LocalDateTime from = day.atStartOfDay();
+        LocalDateTime to = day.plusDays(1).atStartOfDay();
+        long freeSlots = visitRepository.countFreeSlots(doctorId, from, to);
+        log.debug("free slots of doctor {} on {}: {}", doctorId, day, freeSlots);
+        return freeSlots;
     }
 
     @Transactional(readOnly = true)
@@ -89,5 +105,13 @@ public class VisitService {
                 .findByDoctorId(doctorId)
                 .stream()
                 .map(visitMapper::toDto).toList();
+    }
+
+    private void validateSort(Sort sort) {
+        for (Sort.Order order : sort) {
+            if (!SORTABLE_FIELDS.contains(order.getProperty())) {
+                throw new InvalidSortPropertyException(order.getProperty(), SORTABLE_FIELDS);
+            }
+        }
     }
 }

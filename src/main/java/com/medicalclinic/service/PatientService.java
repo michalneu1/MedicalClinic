@@ -12,12 +12,14 @@ import com.medicalclinic.model.User;
 import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PatientService {
@@ -59,7 +61,9 @@ public class PatientService {
                 .build();
         Patient patient = patientMapper.toEntity(command);
         patient.setUser(user);
-        return patientMapper.toDto(patientRepository.save(patient));
+        Patient saved = patientRepository.save(patient);
+        log.info("registered patient {}", saved.getId());
+        return patientMapper.toDto(saved);
     }
 
     @Transactional
@@ -67,6 +71,7 @@ public class PatientService {
         return patientRepository.findById(id)
                 .map(existing -> {
                     patientMapper.updateEntity(newData, existing);
+                    log.info("updated patient {}", id);
                     return patientMapper.toDto(existing);
                 }).orElseThrow(() -> new PatientNotFoundException(id));
     }
@@ -77,6 +82,7 @@ public class PatientService {
             throw new PatientNotFoundException(id);
         }
         patientRepository.deleteById(id);
+        log.info("deleted patient {}", id);
     }
 
     @Transactional
@@ -85,6 +91,7 @@ public class PatientService {
                 .findById(id)
                 .orElseThrow(() -> new PatientNotFoundException(id));
         patient.getUser().setPassword(password);
+        log.info("changed password of patient {}", id);
         return patientMapper.toDto(patient);
     }
 

@@ -3,6 +3,7 @@ package com.medicalclinic.service;
 import com.medicalclinic.dto.visit.VisitCreateCommand;
 import com.medicalclinic.dto.visit.VisitDto;
 import com.medicalclinic.exception.DoctorNotFoundException;
+import com.medicalclinic.exception.InvalidSortPropertyException;
 import com.medicalclinic.exception.InvalidVisitException;
 import com.medicalclinic.exception.PatientNotFoundException;
 import com.medicalclinic.exception.VisitAlreadyBookedException;
@@ -22,10 +23,15 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -228,5 +234,33 @@ class VisitServiceTest {
         // then
         assertSame(patient, visit.getPatient());
         assertEquals(2L, result.patientId());
+    }
+
+    @Test
+    void findAll_sortByAllowedField_returnsRepositoryPage() {
+        // given
+        PageRequest pageable = PageRequest.of(0, 5, Sort.by("startsAt"));
+        Page<Visit> page = new PageImpl<>(List.of(new Visit()), pageable, 1);
+        when(visitRepository.findAll(pageable)).thenReturn(page);
+
+        // when
+        Page<Visit> result = visitService.findAll(pageable);
+
+        // then
+        assertSame(page, result);
+    }
+
+    @Test
+    void findAll_sortByFieldOutsideList_throwsInvalidSortProperty() {
+        // given
+        PageRequest pageable = PageRequest.of(0, 5, Sort.by("abrakadabra"));
+
+        // when
+        InvalidSortPropertyException exception = assertThrows(InvalidSortPropertyException.class,
+                () -> visitService.findAll(pageable));
+
+        // then
+        assertEquals("cannot sort by 'abrakadabra', allowed: startsAt, endsAt", exception.getMessage());
+        verify(visitRepository, never()).findAll(any(PageRequest.class));
     }
 }

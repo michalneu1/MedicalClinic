@@ -1,8 +1,11 @@
 package com.medicalclinic.controller;
 
+import com.medicalclinic.dto.BookingSummaryDto;
 import com.medicalclinic.dto.PageResponse;
 import com.medicalclinic.dto.visit.VisitCreateCommand;
 import com.medicalclinic.dto.visit.VisitDto;
+import com.medicalclinic.facade.VisitBookingFacade;
+import com.medicalclinic.mapper.VisitMapper;
 import com.medicalclinic.service.VisitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +30,8 @@ import java.util.List;
 @Tag(name = "Visits", description = "manages visits")
 public class VisitController {
     private final VisitService visitService;
+    private final VisitBookingFacade visitBookingFacade;
+    private final VisitMapper visitMapper;
 
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Free slot created"),
@@ -61,10 +66,10 @@ public class VisitController {
                     content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class)))
     })
-    @Operation(summary = "Book visit for patient")
+    @Operation(summary = "Book visit for patient and return booking summary")
     @PatchMapping("/{visitId}/book/{patientId}")
-    public VisitDto book(@PathVariable Long visitId, @PathVariable Long patientId) {
-        return visitService.book(visitId, patientId);
+    public BookingSummaryDto book(@PathVariable Long visitId, @PathVariable Long patientId) {
+        return visitBookingFacade.book(visitId, patientId);
     }
 
 
@@ -72,7 +77,7 @@ public class VisitController {
     @GetMapping
     public PageResponse<VisitDto> findAll(
             @PageableDefault(size = 20, sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable) {
-        return PageResponse.from(visitService.findAll(pageable));
+        return PageResponse.from(visitService.findAll(pageable).map(visitMapper::toDto));
     }
 
     @GetMapping(params = "doctorId")
