@@ -1,5 +1,6 @@
 package com.medicalclinic.controller;
 
+import com.medicalclinic.config.SecurityConfig;
 import com.medicalclinic.dto.PatientCreateCommand;
 import com.medicalclinic.dto.PatientDto;
 import com.medicalclinic.exception.PatientAlreadyExistsException;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -33,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(PatientController.class)
-@Import(PatientMapperImpl.class)
+@Import({PatientMapperImpl.class, SecurityConfig.class})
 public class PatientControllerTest {
     @Autowired
     MockMvc mockMvc;
@@ -41,6 +43,7 @@ public class PatientControllerTest {
     PatientService patientService;
 
     @Test
+    @WithMockUser(roles = "PATIENT")
     void getPatient_patientExists_returns200WithPatient() throws Exception {
         // given
         PatientDto dto = new PatientDto(5L,
@@ -62,6 +65,7 @@ public class PatientControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     void getPatients_twoPatientsExist_returns200WithBoth() throws Exception {
         // given
         when(patientService.findAll()).thenReturn(List.of(
@@ -102,6 +106,7 @@ public class PatientControllerTest {
 
 
     @Test
+    @WithMockUser(roles = "PATIENT")
     void getPatient_patientNotFound_returns404WithDetail() throws Exception {
         // given
         when(patientService.findById(99L)).thenThrow(new PatientNotFoundException(99L));
@@ -141,6 +146,7 @@ public class PatientControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PATIENT")
     void deletePatient_patientExists_returns204() throws Exception {
         // given
 
@@ -151,6 +157,7 @@ public class PatientControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PATIENT")
     void deletePatient_patientNotFound_returns404() throws Exception {
         // given
         doThrow(new PatientNotFoundException(99L)).when(patientService).deleteById(99L);
@@ -178,6 +185,7 @@ public class PatientControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PATIENT")
     void getPatient_idNotANumber_returns400WithDetail() throws Exception {
         // given
 
@@ -188,6 +196,7 @@ public class PatientControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PATIENT")
     void getPatient_unexpectedError_returns500WithoutDetails() throws Exception {
         // given
         when(patientService.findById(5L)).thenThrow(new IllegalStateException("connection pool exhausted"));
@@ -200,6 +209,7 @@ public class PatientControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "PATIENT")
     void deletePatients_noId_returns405WithDetail() throws Exception {
         // given
 

@@ -1,8 +1,9 @@
+-- Passwords are BCrypt hashes. Demo passwords: jan.kowalski and piotr.zielinski: haslo123, anna.nowak: silne123
 INSERT INTO users (email, password, role)
 VALUES
-('jan.kowalski@example.com',    'haslo123', 'PATIENT'),
-('anna.nowak@example.com',      'haslo123', 'PATIENT'),
-('piotr.zielinski@example.com', 'haslo123', 'PATIENT')
+('jan.kowalski@example.com',    '$2a$10$4vSmtV8afLa04EZiV80Lz.NUMHacZ/MRgPRaWUZjNC.jiD76m1yLG', 'PATIENT'),
+('anna.nowak@example.com',      '$2a$10$9FEyH9A3xTSw615VKSnXGuHNFItMk/v/BaINHnt72scnCfoxSD9B6', 'PATIENT'),
+('piotr.zielinski@example.com', '$2a$10$4vSmtV8afLa04EZiV80Lz.NUMHacZ/MRgPRaWUZjNC.jiD76m1yLG', 'PATIENT')
     ON CONFLICT DO NOTHING;
 
 INSERT INTO patients (user_id, id_card_no, first_name, last_name, phone_number, birthday)
@@ -12,8 +13,9 @@ VALUES
 ((SELECT id FROM users WHERE email = 'piotr.zielinski@example.com'), 'GHI112233', 'Piotr', 'Zieliński', NULL,        '1978-11-23')
     ON CONFLICT DO NOTHING;
 
+-- Demo password: silne654
 INSERT INTO users (email, password, role)
-VALUES ('katarzyna.wrobel@example.com', 'haslo123', 'DOCTOR')
+VALUES ('katarzyna.wrobel@example.com', '$2a$10$tmD2UgXKS3zxiZut4Qlq8.KurQi3cQqY6S9TslbAMpYAR7knbcu46', 'DOCTOR')
     ON CONFLICT DO NOTHING;
 
 INSERT INTO doctors (user_id, first_name, last_name, specialization)

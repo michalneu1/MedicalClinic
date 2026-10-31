@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -86,6 +87,12 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMismatch(MethodArgumentTypeMismatchException exception) {
         log.warn("Type mismatch: {}", exception.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Parameter " + exception.getName() + " has invalid type");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ProblemDetail handleAuthentication(AuthenticationException exception) {
+        log.warn("Authentication failed: {}", exception.getClass().getSimpleName());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "wrong e-mail or password");
     }
 
     @ExceptionHandler(Exception.class)

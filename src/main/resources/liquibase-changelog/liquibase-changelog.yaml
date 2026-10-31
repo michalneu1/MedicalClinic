@@ -1,0 +1,19 @@
+# Not enforced by the database: visits of one doctor must not overlap.
+# There is no constraint for it (e.g. EXCLUDE on a time range). Today it is
+# checked by VisitService.create via existsByDoctorIdAndStartsAtBeforeAndEndsAtAfter,
+# a read followed by a write without a lock, so two concurrent requests can both
+# pass the check and save overlapping visits. Likewise the "starts on a full
+# quarter hour" and "not in the past" rules are checked only by VisitService.validateTime.
+databaseChangeLog:
+  - include:
+      file: versions/001-initial.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: versions/002-enum-checks.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: versions/003-visits-doctor-index.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: versions/004-admin.yaml
+      relativeToChangelogFile: true
