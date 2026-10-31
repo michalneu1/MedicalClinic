@@ -6,15 +6,18 @@ import com.medicalclinic.exception.UserAlreadyExistsException;
 import com.medicalclinic.exception.UserInUseException;
 import com.medicalclinic.exception.UserNotFoundException;
 import com.medicalclinic.mapper.UserMapper;
+import com.medicalclinic.model.User;
 import com.medicalclinic.repository.DoctorRepository;
 import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -42,7 +45,9 @@ public class UserService {
         if (userRepository.existsByEmail(command.email())) {
             throw new UserAlreadyExistsException(command.email());
         }
-        return userMapper.toDto(userRepository.save(userMapper.toEntity(command)));
+        User saved = userRepository.save(userMapper.toEntity(command));
+        log.info("created user {}", saved.getId());
+        return userMapper.toDto(saved);
     }
 
     @Transactional
@@ -54,5 +59,6 @@ public class UserService {
             throw new UserInUseException(id);
         }
         userRepository.deleteById(id);
+        log.info("deleted user {}", id);
     }
 }

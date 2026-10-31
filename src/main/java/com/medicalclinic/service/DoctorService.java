@@ -21,11 +21,13 @@ import com.medicalclinic.repository.FacilityRepository;
 import com.medicalclinic.repository.UserRepository;
 import com.medicalclinic.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DoctorService {
@@ -59,7 +61,9 @@ public class DoctorService {
         }
         Doctor doctor = doctorMapper.toEntity(command);
         doctor.setUser(user);
-        return doctorMapper.toDto(doctorRepository.save(doctor));
+        Doctor saved = doctorRepository.save(doctor);
+        log.info("created doctor {} for user {}", saved.getId(), user.getId());
+        return doctorMapper.toDto(saved);
     }
 
     @Transactional
@@ -71,6 +75,7 @@ public class DoctorService {
             throw new DoctorHasVisitsException(id);
         }
         doctorRepository.deleteById(id);
+        log.info("deleted doctor {}", id);
     }
 
     @Transactional
@@ -85,6 +90,7 @@ public class DoctorService {
             }
             visit.setDoctor(substitute);
         }
+        log.info("substitution: {} visits moved from doctor {} to doctor {}", visits.size(), id, substitute.getId());
         return visits.stream()
                 .map(visitMapper::toDto)
                 .toList();
@@ -95,6 +101,7 @@ public class DoctorService {
         Doctor doctor = findDoctor(id);
         Facility facility = findFacility(facilityId);
         doctor.addFacility(facility);
+        log.info("assigned doctor {} to facility {}", id, facilityId);
         return doctorMapper.toDto(doctor);
     }
 
@@ -103,6 +110,7 @@ public class DoctorService {
         Doctor doctor = findDoctor(id);
         Facility facility = findFacility(facilityId);
         doctor.removeFacility(facility);
+        log.info("unassigned doctor {} from facility {}", id, facilityId);
         return doctorMapper.toDto(doctor);
     }
 

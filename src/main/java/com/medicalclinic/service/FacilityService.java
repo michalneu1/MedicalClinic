@@ -5,13 +5,16 @@ import com.medicalclinic.dto.facility.FacilityDto;
 import com.medicalclinic.exception.FacilityAlreadyExistsException;
 import com.medicalclinic.exception.FacilityNotFoundException;
 import com.medicalclinic.mapper.FacilityMapper;
+import com.medicalclinic.model.Facility;
 import com.medicalclinic.repository.FacilityRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FacilityService {
@@ -37,6 +40,8 @@ public class FacilityService {
         if (facilityRepository.existsByName(command.name())) {
             throw new FacilityAlreadyExistsException(command.name());
         }
-        return facilityMapper.toDto(facilityRepository.save(facilityMapper.toEntity(command)));
+        Facility saved = facilityRepository.save(facilityMapper.toEntity(command));
+        log.info("created facility {}", saved.getId());
+        return facilityMapper.toDto(saved);
     }
 }
