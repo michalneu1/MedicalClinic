@@ -13,6 +13,7 @@ import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final PatientMapper patientMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public List<PatientDto> findAll() {
@@ -56,7 +58,7 @@ public class PatientService {
         }
         User user = User.builder()
                 .email(command.email())
-                .password(command.password())
+                .password(passwordEncoder.encode(command.password()))
                 .role(Role.PATIENT)
                 .build();
         Patient patient = patientMapper.toEntity(command);
@@ -90,7 +92,7 @@ public class PatientService {
         Patient patient = patientRepository
                 .findById(id)
                 .orElseThrow(() -> new PatientNotFoundException(id));
-        patient.getUser().setPassword(password);
+        patient.getUser().setPassword(passwordEncoder.encode(password));
         log.info("changed password of patient {}", id);
         return patientMapper.toDto(patient);
     }

@@ -1,5 +1,6 @@
 package com.medicalclinic.controller;
 
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,9 +40,27 @@ class PatientApiIntegrationTest {
                 .andExpect(status().isCreated());
 
         // when + then
-        mockMvc.perform(get("/patients").param("email", "nowy.pacjent@example.com"))
+        String patientToken = login("nowy.pacjent@example.com", "tajneHaslo1");
+        mockMvc.perform(get("/patients").param("email", "nowy.pacjent@example.com")
+                        .header("Authorization", "Bearer " + patientToken))
+                .andExpect(status().isForbidden());
+
+        String adminToken = login("admin", "admin");
+        mockMvc.perform(get("/patients").param("email", "nowy.pacjent@example.com")
+                        .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("nowy.pacjent@example.com"))
                 .andExpect(jsonPath("$.firstName").value("Ewa"));
+    }
+
+    private String login(String email, String password) throws Exception {
+        String response = mockMvc.perform(post("/auth/token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "%s", "password": "%s"}
+                                """.formatted(email, password)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return JsonPath.read(response, "$.token");
     }
 }

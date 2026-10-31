@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,6 +36,8 @@ class PatientServiceTest {
     private UserRepository userRepository;
     @Mock
     private PatientMapper patientMapper;
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private PatientService patientService;
@@ -109,14 +112,15 @@ class PatientServiceTest {
         when(userRepository.existsByEmail("jan@example.com")).thenReturn(false);
         when(patientMapper.toEntity(command)).thenReturn(patient);
         when(patientRepository.save(patient)).thenReturn(patient);
+        when(passwordEncoder.encode("tajneHaslo1")).thenReturn("$2a$10$zakodowane");
 
         // when
         patientService.create(command);
 
-        // then:
+        // then
         User user = patient.getUser();
         assertEquals("jan@example.com", user.getEmail());
-        assertEquals("tajneHaslo1", user.getPassword());
+        assertEquals("$2a$10$zakodowane", user.getPassword());
         assertEquals(Role.PATIENT, user.getRole());
     }
 
@@ -126,12 +130,13 @@ class PatientServiceTest {
         User user = User.builder().email("jan@example.com").password("stareHaslo").role(Role.PATIENT).build();
         Patient patient = Patient.builder().id(5L).user(user).firstName("Jan").lastName("Kowalski").build();
         when(patientRepository.findById(5L)).thenReturn(Optional.of(patient));
+        when(passwordEncoder.encode("noweHaslo1")).thenReturn("$2a$10$noweZakodowane");
 
         // when
         patientService.updatePassword(5L, "noweHaslo1");
 
         // then
-        assertEquals("noweHaslo1", patient.getUser().getPassword());
+        assertEquals("$2a$10$noweZakodowane", patient.getUser().getPassword());
     }
 
     @Test

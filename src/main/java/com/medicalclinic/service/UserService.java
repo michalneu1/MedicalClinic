@@ -12,6 +12,7 @@ import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class UserService {
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public List<UserDto> findAll() {
@@ -45,7 +47,9 @@ public class UserService {
         if (userRepository.existsByEmail(command.email())) {
             throw new UserAlreadyExistsException(command.email());
         }
-        User saved = userRepository.save(userMapper.toEntity(command));
+        User user = userMapper.toEntity(command);
+        user.setPassword(passwordEncoder.encode(command.password()));
+        User saved = userRepository.save(user);
         log.info("created user {}", saved.getId());
         return userMapper.toDto(saved);
     }
