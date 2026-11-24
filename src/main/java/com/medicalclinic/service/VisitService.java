@@ -7,12 +7,15 @@ import com.medicalclinic.mapper.VisitMapper;
 import com.medicalclinic.model.Doctor;
 import com.medicalclinic.model.Patient;
 import com.medicalclinic.model.Visit;
+import com.medicalclinic.repository.ConstraintViolations;
 import com.medicalclinic.repository.DoctorRepository;
 import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -33,7 +36,8 @@ public class VisitService {
     private final PatientRepository patientRepository;
     private final VisitMapper visitMapper;
     private final Clock clock;
-    private static final List<String> SORTABLE_FIELDS = List.of("startsAt", "endsAt");
+    private static final String TIE_BREAKER_FIELD = "id";
+    private static final List<String> SORTABLE_FIELDS = List.of("startsAt", "endsAt", TIE_BREAKER_FIELD);
 
     @Transactional
     public VisitDto create(VisitCreateCommand command) {
@@ -48,10 +52,23 @@ public class VisitService {
         }
         Visit visit = visitMapper.toEntity(command);
         visit.setDoctor(doctor);
-        Visit saved = visitRepository.save(visit);
+        Visit saved = saveRejectingDuplicate(visit);
         log.info("created visit {} for doctor {} from {} to {}",
                 saved.getId(), doctor.getId(), saved.getStartsAt(), saved.getEndsAt());
         return visitMapper.toDto(saved);
+    }
+
+    private Visit saveRejectingDuplicate(Visit visit) {
+        try {
+            return visitRepository.saveAndFlush(visit);
+        } catch (DataIntegrityViolationException exception) {
+            if (ConstraintViolations.isUnique(exception)) {
+                log.warn("visit of doctor {} starting at {} was created by a concurrent request",
+                        visit.getDoctor().getId(), visit.getStartsAt());
+                throw new VisitOverlapsException();
+            }
+            throw exception;
+        }
     }
 
     @Transactional
@@ -61,7 +78,7 @@ public class VisitService {
         if (visit.getStartsAt().isBefore(LocalDateTime.now(clock))) {
             throw new InvalidVisitException("Visit in the past cannot be booked");
         }
-        if (visit.getPatient() != null) {
+        if (!visit.isFree()) {
             throw new VisitAlreadyBookedException(visitId);
         }
         Patient patient = patientRepository.findById(patientId)
@@ -85,9 +102,18 @@ public class VisitService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Visit> findAll(Pageable pageable) {
+    public Page<VisitDto> findAll(Pageable pageable) {
         validateSort(pageable.getSort());
-        return visitRepository.findAll(pageable);
+        Pageable stablePageable = PageRequest.of(
+                pageable.getPageNumber(), pageable.getPageSize(), withTieBreaker(pageable.getSort()));
+        return visitRepository.findAll(stablePageable).map(visitMapper::toDto);
+    }
+
+    private Sort withTieBreaker(Sort sort) {
+        if (sort.getOrderFor(TIE_BREAKER_FIELD) != null) {
+            return sort;
+        }
+        return sort.and(Sort.by(TIE_BREAKER_FIELD));
     }
 
     @Transactional(readOnly = true)
@@ -103,6 +129,17 @@ public class VisitService {
     public List<VisitDto> findByDoctorId(Long doctorId) {
         return visitRepository
                 .findByDoctorId(doctorId)
+                .stream()
+                .map(visitMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<VisitDto> findByPatientId(Long patientId) {
+        if (!patientRepository.existsById(patientId)) {
+            throw new PatientNotFoundException(patientId);
+        }
+        return visitRepository
+                .findByPatientIdOrderByStartsAtAscIdAsc(patientId)
                 .stream()
                 .map(visitMapper::toDto).toList();
     }

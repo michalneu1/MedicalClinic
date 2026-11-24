@@ -5,16 +5,20 @@ import com.medicalclinic.dto.BookingSummaryDto;
 import com.medicalclinic.dto.PatientDto;
 import com.medicalclinic.dto.doctor.DoctorDto;
 import com.medicalclinic.dto.visit.VisitDto;
+import com.medicalclinic.exception.InvalidSortPropertyException;
 import com.medicalclinic.exception.PatientNotFoundException;
 import com.medicalclinic.exception.VisitAlreadyBookedException;
 import com.medicalclinic.facade.VisitBookingFacade;
-import com.medicalclinic.mapper.VisitMapperImpl;
 import com.medicalclinic.model.Specialization;
 import com.medicalclinic.service.VisitService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,16 +26,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(VisitController.class)
-@Import({VisitMapperImpl.class, SecurityConfig.class})
+@Import(SecurityConfig.class)
 @WithMockUser(roles = "PATIENT")
-class VisitControllerTest {
+class VisitControllerWebMvcTest {
     @Autowired
     MockMvc mockMvc;
     @MockitoBean
@@ -82,5 +90,52 @@ class VisitControllerTest {
         mockMvc.perform(patch("/visits/2/book/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.detail").value("Patient with id: 99 not found"));
+    }
+
+    @Test
+    void getVisits_noParameters_returns200WithFirstPageOfTwentySortedByStartsAt() throws Exception {
+        // given
+        LocalDateTime startsAt = LocalDateTime.of(2030, 3, 4, 10, 0);
+        Pageable defaults = PageRequest.of(0, 20, Sort.by("startsAt"));
+        when(visitService.findAll(defaults)).thenReturn(new PageImpl<>(
+                List.of(new VisitDto(7L, 1L, null, startsAt, startsAt.plusMinutes(30))), defaults, 1));
+
+        // when + then
+        mockMvc.perform(get("/visits"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].id").value(7))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1));
+    }
+
+    @Test
+    void getVisits_doctorIdGiven_returns200WithPlainListOfDoctorVisits() throws Exception {
+        // given
+        LocalDateTime startsAt = LocalDateTime.of(2030, 3, 4, 10, 0);
+        when(visitService.findByDoctorId(1L)).thenReturn(
+                List.of(new VisitDto(7L, 1L, null, startsAt, startsAt.plusMinutes(30))));
+
+        // when + then
+        mockMvc.perform(get("/visits").param("doctorId", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].doctorId").value(1));
+        verify(visitService, never()).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void getVisits_sortOutsideAllowedList_returns400WithDetail() throws Exception {
+        // given
+        when(visitService.findAll(any(Pageable.class))).thenThrow(
+                new InvalidSortPropertyException("abrakadabra", List.of("startsAt", "endsAt", "id")));
+
+        // when + then
+        mockMvc.perform(get("/visits").param("sort", "abrakadabra"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail")
+                        .value("cannot sort by 'abrakadabra', allowed: startsAt, endsAt, id"));
     }
 }

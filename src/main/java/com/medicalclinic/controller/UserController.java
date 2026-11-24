@@ -10,15 +10,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/users")
 @Tag(name = "Users", description = "manages user accounts")
 public class UserController {
@@ -73,14 +74,14 @@ public class UserController {
                     content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "409",
-                    description = "User is assigned to a patient",
+                    description = "User is assigned to a patient or doctor, or is the account of the caller",
                     content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class)))
     })
     @Operation(summary = "Delete user")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable Long id) {
-        userService.deleteById(id);
+    public void deleteById(@PathVariable Long id, Authentication authentication) {
+        userService.deleteById(id, authentication.getName());
     }
 }

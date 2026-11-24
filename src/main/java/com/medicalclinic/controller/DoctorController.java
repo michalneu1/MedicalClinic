@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/doctors")
 @Tag(name = "Doctors", description = "manages doctors")
 public class DoctorController {
@@ -44,7 +44,7 @@ public class DoctorController {
                     content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "409",
-                    description = "User already has a doctor",
+                    description = "User already has a doctor or does not have role DOCTOR",
                     content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class)))
     })
@@ -87,9 +87,9 @@ public class DoctorController {
     }
 
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Visits moved to substitute"),
+            @ApiResponse(responseCode = "200", description = "Upcoming visits moved to substitute"),
             @ApiResponse(responseCode = "400",
-                    description = "Request body is not valid",
+                    description = "Request body is not valid or doctor is their own substitute",
                     content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404",
@@ -97,11 +97,11 @@ public class DoctorController {
                     content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "409",
-                    description = "Substitute already has a visit in this time slot",
+                    description = "Doctor has no upcoming visits or substitute already has a visit in this time slot",
                     content = @Content(schema =
                     @Schema(implementation = ProblemDetail.class)))
     })
-    @Operation(summary = "Move all doctor's visits to substitute")
+    @Operation(summary = "Move doctor's upcoming visits to substitute")
     @PostMapping("/{id}/substitutions")
     public List<VisitDto> substitute(@PathVariable Long id, @Valid @RequestBody SubstitutionCommand command) {
         return doctorService.substitute(id, command);

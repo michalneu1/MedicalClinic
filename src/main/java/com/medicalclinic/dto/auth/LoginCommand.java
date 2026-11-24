@@ -8,4 +8,8 @@ public record LoginCommand(
         @NotBlank(message = "password is required")
         String password
 ) {
+    @Override
+    public String toString() {
+        return "LoginCommand[email=" + email + ", password=***]";
+    }
 }

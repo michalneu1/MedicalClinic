@@ -12,9 +12,13 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 
     boolean existsByDoctorId(Long doctorId);
 
+    boolean existsByPatientId(Long patientId);
+
     List<Visit> findByDoctorId(Long doctorId);
 
-    List<Visit> findByDoctorIdOrderByStartsAtAsc(Long doctorId);
+    List<Visit> findByDoctorIdAndStartsAtGreaterThanEqualOrderByStartsAtAsc(Long doctorId, LocalDateTime from);
+
+    List<Visit> findByPatientIdOrderByStartsAtAscIdAsc(Long patientId);
 
     boolean existsByDoctorIdAndStartsAtBeforeAndEndsAtAfter(Long doctorId,
                                                             LocalDateTime endsAt,

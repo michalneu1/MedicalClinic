@@ -8,23 +8,31 @@ import com.medicalclinic.exception.DoctorAlreadyExistsException;
 import com.medicalclinic.exception.DoctorHasVisitsException;
 import com.medicalclinic.exception.DoctorNotFoundException;
 import com.medicalclinic.exception.FacilityNotFoundException;
+import com.medicalclinic.exception.NoVisitsToSubstituteException;
+import com.medicalclinic.exception.SelfSubstitutionException;
+import com.medicalclinic.exception.UserNotDoctorException;
 import com.medicalclinic.exception.UserNotFoundException;
 import com.medicalclinic.exception.VisitOverlapsException;
 import com.medicalclinic.mapper.DoctorMapper;
 import com.medicalclinic.mapper.VisitMapper;
 import com.medicalclinic.model.Doctor;
 import com.medicalclinic.model.Facility;
+import com.medicalclinic.model.Role;
 import com.medicalclinic.model.User;
 import com.medicalclinic.model.Visit;
+import com.medicalclinic.repository.ConstraintViolations;
 import com.medicalclinic.repository.DoctorRepository;
 import com.medicalclinic.repository.FacilityRepository;
 import com.medicalclinic.repository.UserRepository;
 import com.medicalclinic.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -37,6 +45,7 @@ public class DoctorService {
     private final FacilityRepository facilityRepository;
     private final DoctorMapper doctorMapper;
     private final VisitMapper visitMapper;
+    private final Clock clock;
 
     @Transactional(readOnly = true)
     public List<DoctorDto> findAll() {
@@ -56,6 +65,9 @@ public class DoctorService {
     public DoctorDto create(DoctorCreateCommand command) {
         User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new UserNotFoundException(command.userId()));
+        if (user.getRole() != Role.DOCTOR) {
+            throw new UserNotDoctorException(user.getId(), user.getRole());
+        }
         if (doctorRepository.existsByUserId(command.userId())) {
             throw new DoctorAlreadyExistsException(command.userId());
         }
@@ -81,8 +93,15 @@ public class DoctorService {
     @Transactional
     public List<VisitDto> substitute(Long id, SubstitutionCommand command) {
         findDoctor(id);
+        if (id.equals(command.substituteId())) {
+            throw new SelfSubstitutionException(id);
+        }
         Doctor substitute = findDoctor(command.substituteId());
-        List<Visit> visits = visitRepository.findByDoctorIdOrderByStartsAtAsc(id);
+        List<Visit> visits = visitRepository.findByDoctorIdAndStartsAtGreaterThanEqualOrderByStartsAtAsc(
+                id, LocalDateTime.now(clock));
+        if (visits.isEmpty()) {
+            throw new NoVisitsToSubstituteException(id);
+        }
         for (Visit visit : visits) {
             if (visitRepository.existsByDoctorIdAndStartsAtBeforeAndEndsAtAfter(
                     substitute.getId(), visit.getEndsAt(), visit.getStartsAt())) {
@@ -90,6 +109,7 @@ public class DoctorService {
             }
             visit.setDoctor(substitute);
         }
+        flushRejectingDuplicate(id, substitute.getId());
         log.info("substitution: {} visits moved from doctor {} to doctor {}", visits.size(), id, substitute.getId());
         return visits.stream()
                 .map(visitMapper::toDto)
@@ -112,6 +132,19 @@ public class DoctorService {
         doctor.removeFacility(facility);
         log.info("unassigned doctor {} from facility {}", id, facilityId);
         return doctorMapper.toDto(doctor);
+    }
+
+    private void flushRejectingDuplicate(Long id, Long substituteId) {
+        try {
+            visitRepository.flush();
+        } catch (DataIntegrityViolationException exception) {
+            if (ConstraintViolations.isUnique(exception)) {
+                log.warn("substitution of doctor {} by doctor {} collided with a concurrent request",
+                        id, substituteId);
+                throw new VisitOverlapsException();
+            }
+            throw exception;
+        }
     }
 
     private Doctor findDoctor(Long id) {

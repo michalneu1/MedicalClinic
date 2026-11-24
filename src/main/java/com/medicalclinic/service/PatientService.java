@@ -4,13 +4,16 @@ import com.medicalclinic.dto.PatientCreateCommand;
 import com.medicalclinic.dto.PatientDto;
 import com.medicalclinic.dto.PatientUpdateCommand;
 import com.medicalclinic.exception.PatientAlreadyExistsException;
+import com.medicalclinic.exception.PatientHasVisitsException;
 import com.medicalclinic.exception.PatientNotFoundException;
 import com.medicalclinic.mapper.PatientMapper;
 import com.medicalclinic.model.Patient;
 import com.medicalclinic.model.Role;
 import com.medicalclinic.model.User;
+import com.medicalclinic.repository.DoctorRepository;
 import com.medicalclinic.repository.PatientRepository;
 import com.medicalclinic.repository.UserRepository;
+import com.medicalclinic.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +29,8 @@ import java.util.List;
 public class PatientService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
+    private final VisitRepository visitRepository;
+    private final DoctorRepository doctorRepository;
     private final PatientMapper patientMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -52,9 +57,11 @@ public class PatientService {
 
     @Transactional
     public PatientDto create(PatientCreateCommand command) {
-        //Business validation repository must be checked if email already exist
         if (userRepository.existsByEmail(command.email())) {
-            throw new PatientAlreadyExistsException();
+            throw PatientAlreadyExistsException.emailTaken();
+        }
+        if (patientRepository.existsByIdCardNo(command.idCardNo())) {
+            throw PatientAlreadyExistsException.idCardNoTaken();
         }
         User user = User.builder()
                 .email(command.email())
@@ -80,11 +87,19 @@ public class PatientService {
 
     @Transactional
     public void deleteById(Long id) {
-        if (!patientRepository.existsById(id)) {
-            throw new PatientNotFoundException(id);
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new PatientNotFoundException(id));
+        if (visitRepository.existsByPatientId(id)) {
+            throw new PatientHasVisitsException(id);
         }
-        patientRepository.deleteById(id);
-        log.info("deleted patient {}", id);
+        User user = patient.getUser();
+        patientRepository.delete(patient);
+        if (doctorRepository.existsByUserId(user.getId())) {
+            log.info("deleted patient {}, user {} kept for doctor profile", id, user.getId());
+            return;
+        }
+        userRepository.delete(user);
+        log.info("deleted patient {} with user {}", id, user.getId());
     }
 
     @Transactional
