@@ -1,0 +1,25 @@
+meta {
+  name: Szukaj po fragmencie nazwiska
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/patients?fragment=testow
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("znajduje nowego pacjenta bez wzgledu na wielkosc liter", function () {
+    expect(res.body.map(p => p.id)).to.include(bru.getVar("patientId"));
+  });
+}

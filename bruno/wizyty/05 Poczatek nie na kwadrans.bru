@@ -1,0 +1,27 @@
+meta {
+  name: Początek nie na kwadrans
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/visits
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "doctorId": {{doktorId}},
+    "startsAt": "{{dzien}}T09:05:00",
+    "endsAt": "{{dzien}}T09:35:00"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

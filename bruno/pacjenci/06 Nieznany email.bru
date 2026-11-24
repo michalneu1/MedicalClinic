@@ -1,0 +1,19 @@
+meta {
+  name: Nieznany email
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/patients?email=nikt@example.com
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 404
+}

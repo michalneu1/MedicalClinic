@@ -1,0 +1,25 @@
+meta {
+  name: Lista doktorów
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/doctors
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("lista zawiera nowego doktora", function () {
+    expect(res.body.map(d => d.id)).to.include(bru.getVar("nowyDoktorId"));
+  });
+}

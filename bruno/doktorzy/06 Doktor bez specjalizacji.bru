@@ -1,0 +1,27 @@
+meta {
+  name: Doktor bez specjalizacji
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/doctors
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "userId": {{kontoDoktoraId}},
+    "firstName": "Tomasz",
+    "lastName": "Kamiński"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

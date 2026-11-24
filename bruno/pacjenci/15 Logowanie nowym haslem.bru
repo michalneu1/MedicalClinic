@@ -1,0 +1,22 @@
+meta {
+  name: Logowanie nowym hasłem
+  type: http
+  seq: 15
+}
+
+post {
+  url: {{baseUrl}}/auth/token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{nowyPacjentEmail}}",
+    "password": "noweHaslo123"
+  }
+}
+
+assert {
+  res.status: eq 200
+}

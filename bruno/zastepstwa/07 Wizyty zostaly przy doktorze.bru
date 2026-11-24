@@ -1,0 +1,28 @@
+meta {
+  name: Wizyty zostały przy doktorze
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/visits?doctorId={{doktorId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("obie wizyty nadal u pierwszego doktora", function () {
+    const ids = [bru.getVar("wizyta1Id"), bru.getVar("wizyta2Id")];
+    const found = res.body.filter(v => ids.includes(v.id));
+    expect(found).to.have.lengthOf(2);
+    found.forEach(v => expect(v.doctorId).to.equal(bru.getVar("doktorId")));
+  });
+}

@@ -1,0 +1,27 @@
+meta {
+  name: Slot zakładany przez pacjenta
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/visits
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "doctorId": {{doktorId}},
+    "startsAt": "{{dzien}}T09:00:00",
+    "endsAt": "{{dzien}}T09:30:00"
+  }
+}
+
+assert {
+  res.status: eq 403
+}

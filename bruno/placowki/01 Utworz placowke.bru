@@ -1,0 +1,38 @@
+meta {
+  name: Utwórz placówkę
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/facilities
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "name": "{{placowkaNazwa}}",
+    "city": "Kraków",
+    "zipCode": "30-500",
+    "street": "Kalwaryjska",
+    "number": "10"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:pre-request {
+  bru.setVar("placowkaNazwa", `Przychodnia Podgórze ${Date.now()}`);
+  bru.setVar("nazwa256", "a".repeat(256));
+}
+
+script:post-response {
+  bru.setVar("placowkaId", res.body.id);
+}

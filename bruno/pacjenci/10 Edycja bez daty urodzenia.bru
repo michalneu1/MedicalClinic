@@ -1,0 +1,27 @@
+meta {
+  name: Edycja bez daty urodzenia
+  type: http
+  seq: 10
+}
+
+put {
+  url: {{baseUrl}}/patients/{{patientId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "firstName": "Ewa",
+    "lastName": "Zmieniona",
+    "phoneNumber": "600700801"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Zajęta nazwa
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/facilities
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "name": "{{placowkaNazwa}}",
+    "city": "Kraków"
+  }
+}
+
+assert {
+  res.status: eq 409
+}

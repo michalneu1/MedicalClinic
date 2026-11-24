@@ -1,0 +1,27 @@
+meta {
+  name: Wizyty doktora
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/visits?doctorId={{doktorId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("pelna lista wizyt doktora zawiera nowy termin", function () {
+    expect(res.body).to.be.an("array");
+    expect(res.body.map(v => v.id)).to.include(bru.getVar("wizytaId"));
+    res.body.forEach(v => expect(v.doctorId).to.equal(bru.getVar("doktorId")));
+  });
+}

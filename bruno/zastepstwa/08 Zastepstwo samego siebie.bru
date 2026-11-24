@@ -1,0 +1,25 @@
+meta {
+  name: Zastępstwo samego siebie
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/doctors/{{doktorId}}/substitutions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "substituteId": {{doktorId}}
+  }
+}
+
+assert {
+  res.status: eq 400
+}

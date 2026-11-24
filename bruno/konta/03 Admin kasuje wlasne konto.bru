@@ -1,0 +1,19 @@
+meta {
+  name: Admin kasuje własne konto
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/users/{{adminKontoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 409
+}

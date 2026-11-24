@@ -1,0 +1,26 @@
+meta {
+  name: Wizyty pacjenta po rezerwacji
+  type: http
+  seq: 21
+}
+
+get {
+  url: {{baseUrl}}/patients/{{pacjentWizytId}}/visits
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("pacjent widzi swoja wizyte", function () {
+    expect(res.body).to.have.lengthOf(1);
+    expect(res.body[0].id).to.equal(bru.getVar("wizytaId"));
+  });
+}

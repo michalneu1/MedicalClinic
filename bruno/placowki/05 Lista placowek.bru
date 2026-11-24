@@ -1,0 +1,25 @@
+meta {
+  name: Lista placówek
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/facilities
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{doktorToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("lista zawiera nowa placowke", function () {
+    expect(res.body.map(f => f.id)).to.include(bru.getVar("placowkaId"));
+  });
+}

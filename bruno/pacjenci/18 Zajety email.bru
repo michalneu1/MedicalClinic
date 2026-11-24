@@ -1,0 +1,27 @@
+meta {
+  name: Zajęty email
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{nowyPacjentEmail}}",
+    "password": "haslo1234",
+    "idCardNo": "XYZ999999",
+    "firstName": "Ewa",
+    "lastName": "Duplikat",
+    "phoneNumber": "600700800",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 409
+}

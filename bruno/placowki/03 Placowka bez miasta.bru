@@ -1,0 +1,25 @@
+meta {
+  name: Placówka bez miasta
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/facilities
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "name": "Bez miasta {{placowkaNazwa}}"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

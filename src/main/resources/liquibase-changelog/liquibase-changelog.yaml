@@ -1,0 +1,25 @@
+# Only partly enforced by the database: visits of one doctor must not overlap.
+# uq_visits_doctor_id_starts_at (changeset 22) rejects two visits of one doctor with the
+# same start, so concurrent identical requests cannot both be saved. Visits that overlap
+# with different starts (e.g. 10:00-10:30 and 10:15-10:45) have no constraint (e.g. EXCLUDE
+# on a time range). They are checked by VisitService.create via
+# existsByDoctorIdAndStartsAtBeforeAndEndsAtAfter, a read followed by a write without a lock,
+# so two concurrent requests can both pass the check and save overlapping visits. Likewise the
+# "starts on a full quarter hour" and "not in the past" rules are checked only by
+# VisitService.validateTime.
+databaseChangeLog:
+  - include:
+      file: versions/001-initial.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: versions/002-enum-checks.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: versions/003-visits-doctor-index.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: versions/004-admin.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: versions/005-visits-doctor-start-unique.yaml
+      relativeToChangelogFile: true

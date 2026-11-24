@@ -1,0 +1,20 @@
+meta {
+  name: Data urodzenia po odrzuconej edycji
+  type: http
+  seq: 11
+}
+
+get {
+  url: {{baseUrl}}/patients/{{patientId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.birthday: eq 1992-05-20
+}

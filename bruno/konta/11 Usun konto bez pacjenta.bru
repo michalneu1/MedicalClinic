@@ -1,0 +1,19 @@
+meta {
+  name: Usuń konto bez pacjenta
+  type: http
+  seq: 11
+}
+
+delete {
+  url: {{baseUrl}}/users/{{kontoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 204
+}

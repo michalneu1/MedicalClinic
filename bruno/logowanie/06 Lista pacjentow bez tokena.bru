@@ -1,0 +1,15 @@
+meta {
+  name: Lista pacjentów bez tokena
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/patients
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 401
+}

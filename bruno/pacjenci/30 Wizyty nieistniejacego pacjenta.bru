@@ -1,0 +1,19 @@
+meta {
+  name: Wizyty nieistniejącego pacjenta
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{baseUrl}}/patients/999999/visits
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 404
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Konto usuniętego pacjenta
+  type: http
+  seq: 33
+}
+
+post {
+  url: {{baseUrl}}/auth/token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{nowyPacjentEmail}}",
+    "password": "noweHaslo123"
+  }
+}
+
+assert {
+  res.status: eq 401
+}

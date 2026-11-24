@@ -1,0 +1,25 @@
+meta {
+  name: Pacjent po emailu
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/patients?email={{nowyPacjentEmail}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("zwraca jednego pacjenta, nie liste", function () {
+    expect(res.body.id).to.equal(bru.getVar("patientId"));
+  });
+}
