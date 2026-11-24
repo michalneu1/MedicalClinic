@@ -1,0 +1,19 @@
+meta {
+  name: Przypisz doktora do placówki
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/doctors/{{doktorId}}/facilities/{{placowkaId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{doktorToken}}
+}
+
+assert {
+  res.status: eq 200
+}

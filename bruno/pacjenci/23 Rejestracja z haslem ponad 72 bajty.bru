@@ -1,0 +1,27 @@
+meta {
+  name: Rejestracja z hasłem ponad 72 bajty
+  type: http
+  seq: 23
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "haslo.{{nowyPacjentEmail}}",
+    "password": "{{haslo73}}",
+    "idCardNo": "HAS000001",
+    "firstName": "Ewa",
+    "lastName": "Testowa",
+    "phoneNumber": "600700800",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

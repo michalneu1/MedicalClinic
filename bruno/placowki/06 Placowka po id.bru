@@ -1,0 +1,20 @@
+meta {
+  name: Placówka po id
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/facilities/{{placowkaId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.city: eq Kraków
+}

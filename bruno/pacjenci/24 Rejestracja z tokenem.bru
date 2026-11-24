@@ -1,0 +1,31 @@
+meta {
+  name: Rejestracja z tokenem
+  type: http
+  seq: 24
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "email": "token.{{nowyPacjentEmail}}",
+    "password": "haslo1234",
+    "idCardNo": "TOK000001",
+    "firstName": "Ewa",
+    "lastName": "Testowa",
+    "phoneNumber": "600700800",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 403
+}

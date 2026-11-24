@@ -1,0 +1,37 @@
+meta {
+  name: Pacjent do rezerwacji
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{pacjentWizytEmail}}",
+    "password": "haslo1234",
+    "idCardNo": "{{pacjentWizytDowod}}",
+    "firstName": "Ewa",
+    "lastName": "Rezerwująca",
+    "phoneNumber": "600700800",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:pre-request {
+  const n = Date.now() % 1000000;
+  bru.setVar("pacjentWizytEmail", `ewa.rezerwujaca.${n}@example.com`);
+  bru.setVar("pacjentWizytDowod", "WIZ" + String(n).padStart(6, "0"));
+}
+
+script:post-response {
+  bru.setVar("pacjentWizytId", res.body.id);
+}

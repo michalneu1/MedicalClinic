@@ -1,0 +1,28 @@
+meta {
+  name: Strona wizyt
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/visits?page=0&size=1&sort=startsAt,desc
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("jedna strona z opisem stronicowania", function () {
+    expect(res.body.content).to.have.lengthOf(1);
+    expect(res.body.page).to.equal(0);
+    expect(res.body.size).to.equal(1);
+    expect(res.body.totalElements).to.be.at.least(2);
+  });
+}

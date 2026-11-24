@@ -1,0 +1,35 @@
+meta {
+  name: Konto zastępcy
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "email": "{{zastepcaEmail}}",
+    "password": "haslo1234",
+    "role": "DOCTOR"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:pre-request {
+  bru.setVar("zastepcaEmail", `zastepca.${Date.now()}@example.com`);
+}
+
+script:post-response {
+  bru.setVar("kontoZastepcyId", res.body.id);
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Kasowanie konta pacjenta
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{baseUrl}}/users/{{janKontoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 409
+}

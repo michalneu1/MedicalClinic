@@ -5,16 +5,17 @@ import com.medicalclinic.dto.PageResponse;
 import com.medicalclinic.dto.visit.VisitCreateCommand;
 import com.medicalclinic.dto.visit.VisitDto;
 import com.medicalclinic.facade.VisitBookingFacade;
-import com.medicalclinic.mapper.VisitMapper;
 import com.medicalclinic.service.VisitService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -22,16 +23,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping("/visits")
 @Tag(name = "Visits", description = "manages visits")
 public class VisitController {
     private final VisitService visitService;
     private final VisitBookingFacade visitBookingFacade;
-    private final VisitMapper visitMapper;
 
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Free slot created"),
@@ -57,6 +55,10 @@ public class VisitController {
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Visit booked"),
+            @ApiResponse(responseCode = "400",
+                    description = "Visit is in the past or id is invalid",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404",
                     description = "Visit or patient not found",
                     content = @Content(schema =
@@ -73,15 +75,27 @@ public class VisitController {
     }
 
 
-    @Operation(summary = "List visits page by page")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "One page of visits (no 'doctorId') or the full list of visits of the doctor",
+                    content = @Content(schema = @Schema(oneOf = {PageResponse.class, VisitDto[].class}))),
+            @ApiResponse(responseCode = "400",
+                    description = "Sort property is not allowed (allowed: startsAt, endsAt, id) or invalid doctorId",
+                    content = @Content(schema =
+                    @Schema(implementation = ProblemDetail.class)))
+    })
+    @Operation(summary = "List visits: page by page, or all visits of one doctor",
+            description = "Without 'doctorId' returns one page of all visits (parameters: page, size, sort). "
+                    + "With 'doctorId' returns the full list of visits of that doctor, without paging.")
     @GetMapping
-    public PageResponse<VisitDto> findAll(
+    public Object findAll(
+            @Parameter(description = "Id of the doctor; when given, paging parameters are ignored")
+            @RequestParam(required = false) Long doctorId,
+            @ParameterObject
             @PageableDefault(size = 20, sort = "startsAt", direction = Sort.Direction.ASC) Pageable pageable) {
-        return PageResponse.from(visitService.findAll(pageable).map(visitMapper::toDto));
-    }
-
-    @GetMapping(params = "doctorId")
-    public List<VisitDto> findByDoctorId(@RequestParam Long doctorId) {
-        return visitService.findByDoctorId(doctorId);
+        if (doctorId != null) {
+            return visitService.findByDoctorId(doctorId);
+        }
+        return PageResponse.from(visitService.findAll(pageable));
     }
 }

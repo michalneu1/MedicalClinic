@@ -1,0 +1,33 @@
+meta {
+  name: Zajęty numer dowodu
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "dowod.{{nowyPacjentEmail}}",
+    "password": "haslo1234",
+    "idCardNo": "{{nowyPacjentDowod}}",
+    "firstName": "Ewa",
+    "lastName": "Duplikat",
+    "phoneNumber": "600700800",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 409
+}
+
+tests {
+  test("komunikat nie zawiera numeru dowodu", function () {
+    expect(res.body.detail).to.not.include(bru.getVar("nowyPacjentDowod"));
+  });
+}

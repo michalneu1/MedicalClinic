@@ -1,0 +1,23 @@
+meta {
+  name: Zastępstwo bez zastępcy
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/doctors/{{doktorId}}/substitutions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+}

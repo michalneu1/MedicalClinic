@@ -1,0 +1,20 @@
+meta {
+  name: Pacjent po id
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/patients/{{patientId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.lastName: eq Testowa
+}

@@ -1,0 +1,33 @@
+meta {
+  name: Udane zastępstwo
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/doctors/{{zastepcaId}}/substitutions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "substituteId": {{nowyDoktorId}}
+  }
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("wizyta zastepcy przeszla do nowego doktora", function () {
+    expect(res.body).to.have.lengthOf(1);
+    expect(res.body[0].id).to.equal(bru.getVar("wizytaZastepcyId"));
+    expect(res.body[0].doctorId).to.equal(bru.getVar("nowyDoktorId"));
+  });
+}

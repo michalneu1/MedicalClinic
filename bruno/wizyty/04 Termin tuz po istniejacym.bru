@@ -1,0 +1,31 @@
+meta {
+  name: Termin tuż po istniejącym
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/visits
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "doctorId": {{doktorId}},
+    "startsAt": "{{dzien}}T08:30:00",
+    "endsAt": "{{dzien}}T08:45:00"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:post-response {
+  bru.setVar("wizytaWolnaId", res.body.id);
+}

@@ -1,0 +1,20 @@
+meta {
+  name: Doktor po id
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/doctors/{{nowyDoktorId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.lastName: eq Kamiński
+}

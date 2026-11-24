@@ -1,0 +1,19 @@
+meta {
+  name: Id nie jest liczbą
+  type: http
+  seq: 28
+}
+
+get {
+  url: {{baseUrl}}/patients/abc
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 400
+}

@@ -1,0 +1,26 @@
+meta {
+  name: Za długa nazwa
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/facilities
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "name": "{{nazwa256}}",
+    "city": "Kraków"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Rezerwacja
+  type: http
+  seq: 17
+}
+
+patch {
+  url: {{baseUrl}}/visits/{{wizytaId}}/book/{{pacjentWizytId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("podsumowanie rezerwacji", function () {
+    expect(res.body.visit.id).to.equal(bru.getVar("wizytaId"));
+    expect(res.body.visit.patientId).to.equal(bru.getVar("pacjentWizytId"));
+    expect(res.body.patient.id).to.equal(bru.getVar("pacjentWizytId"));
+    expect(res.body.doctor.id).to.equal(bru.getVar("doktorId"));
+    expect(res.body.freeSlotsThatDay).to.be.at.least(1);
+  });
+}

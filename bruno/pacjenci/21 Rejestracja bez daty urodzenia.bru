@@ -1,0 +1,26 @@
+meta {
+  name: Rejestracja bez daty urodzenia
+  type: http
+  seq: 21
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "bezdaty.{{nowyPacjentEmail}}",
+    "password": "haslo1234",
+    "idCardNo": "BEZ000001",
+    "firstName": "Ewa",
+    "lastName": "Testowa",
+    "phoneNumber": "600700800"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

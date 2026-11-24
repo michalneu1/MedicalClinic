@@ -1,6 +1,7 @@
 package com.medicalclinic.repository;
 
 import com.medicalclinic.model.Patient;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +15,13 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     boolean existsByUserId(Long userId);
 
+    boolean existsByIdCardNo(String idCardNo);
+
+    @Override
+    @EntityGraph(attributePaths = "user")
+    List<Patient> findAll();
+
+    @EntityGraph(attributePaths = "user")
     @Query("""
             select p from Patient p
             where lower(p.firstName) like lower(concat('%', :fragment, '%'))

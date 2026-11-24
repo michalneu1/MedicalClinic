@@ -1,0 +1,27 @@
+meta {
+  name: Token lekarza
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "katarzyna.wrobel@example.com",
+    "password": "silne654"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.token: isString
+}
+
+script:post-response {
+  bru.setVar("doktorToken", res.body.token);
+}

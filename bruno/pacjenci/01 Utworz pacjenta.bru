@@ -1,0 +1,47 @@
+meta {
+  name: Utwórz pacjenta
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "{{nowyPacjentEmail}}",
+    "password": "haslo1234",
+    "idCardNo": "{{nowyPacjentDowod}}",
+    "firstName": "Ewa",
+    "lastName": "Testowa",
+    "phoneNumber": "600700800",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:pre-request {
+  const n = Date.now() % 1000000;
+  bru.setVar("nowyPacjentEmail", `ewa.testowa.${n}@example.com`);
+  bru.setVar("nowyPacjentDowod", "TST" + String(n).padStart(6, "0"));
+  bru.setVar("imie101", "a".repeat(101));
+  bru.setVar("haslo73", "a".repeat(73));
+}
+
+script:post-response {
+  bru.setVar("patientId", res.body.id);
+}
+
+tests {
+  test("odpowiedz nie zawiera hasla ani numeru dowodu", function () {
+    expect(res.body.email).to.equal(bru.getVar("nowyPacjentEmail"));
+    expect(res.body).to.not.have.property("password");
+    expect(res.body).to.not.have.property("idCardNo");
+  });
+}

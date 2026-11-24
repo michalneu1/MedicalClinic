@@ -1,0 +1,19 @@
+meta {
+  name: Przypisanie do nieistniejącej placówki
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/doctors/{{doktorId}}/facilities/999999
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{doktorToken}}
+}
+
+assert {
+  res.status: eq 404
+}

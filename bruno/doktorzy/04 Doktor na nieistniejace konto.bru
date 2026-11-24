@@ -1,0 +1,28 @@
+meta {
+  name: Doktor na nieistniejące konto
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/doctors
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "userId": 999999,
+    "firstName": "Tomasz",
+    "lastName": "Nikt",
+    "specialization": "DERMATOLOGIST"
+  }
+}
+
+assert {
+  res.status: eq 404
+}

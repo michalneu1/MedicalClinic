@@ -1,0 +1,19 @@
+meta {
+  name: Email i fragment naraz
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/patients?email={{nowyPacjentEmail}}&fragment=testow
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 400
+}

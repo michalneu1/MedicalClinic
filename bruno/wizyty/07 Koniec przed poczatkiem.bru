@@ -1,0 +1,27 @@
+meta {
+  name: Koniec przed początkiem
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/visits
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "doctorId": {{doktorId}},
+    "startsAt": "{{dzien}}T09:30:00",
+    "endsAt": "{{dzien}}T09:00:00"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

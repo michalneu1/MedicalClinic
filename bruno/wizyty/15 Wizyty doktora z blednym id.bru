@@ -1,0 +1,19 @@
+meta {
+  name: Wizyty doktora z błędnym id
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/visits?doctorId=abc
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 400
+}

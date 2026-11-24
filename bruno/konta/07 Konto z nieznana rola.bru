@@ -1,0 +1,27 @@
+meta {
+  name: Konto z nieznaną rolą
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "email": "rola.{{noweKontoEmail}}",
+    "password": "haslo1234",
+    "role": "KSIEGOWY"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

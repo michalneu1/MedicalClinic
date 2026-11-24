@@ -1,0 +1,23 @@
+meta {
+  name: Zepsuty JSON
+  type: http
+  seq: 26
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: text
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:text {
+  {"email":
+}
+
+assert {
+  res.status: eq 400
+}

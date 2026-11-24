@@ -1,0 +1,22 @@
+meta {
+  name: Pacjent bez wymaganych pól
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "zly-email",
+    "password": "krotkie"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

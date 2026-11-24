@@ -1,0 +1,28 @@
+meta {
+  name: Doktor na koncie pacjenta
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/doctors
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "userId": {{janKontoId}},
+    "firstName": "Tomasz",
+    "lastName": "Kowalski",
+    "specialization": "DERMATOLOGIST"
+  }
+}
+
+assert {
+  res.status: eq 409
+}

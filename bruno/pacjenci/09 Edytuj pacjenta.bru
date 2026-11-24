@@ -1,0 +1,35 @@
+meta {
+  name: Edytuj pacjenta
+  type: http
+  seq: 9
+}
+
+put {
+  url: {{baseUrl}}/patients/{{patientId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "firstName": "Ewa",
+    "lastName": "Zmieniona",
+    "phoneNumber": "600700801",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.lastName: eq Zmieniona
+}
+
+tests {
+  test("telefon zostal zmieniony", function () {
+    expect(res.body.phoneNumber).to.equal("600700801");
+  });
+}

@@ -2,6 +2,7 @@ package com.medicalclinic.service;
 
 import com.medicalclinic.dto.user.UserCreateCommand;
 import com.medicalclinic.dto.user.UserDto;
+import com.medicalclinic.exception.SelfDeletionException;
 import com.medicalclinic.exception.UserAlreadyExistsException;
 import com.medicalclinic.exception.UserInUseException;
 import com.medicalclinic.exception.UserNotFoundException;
@@ -55,14 +56,16 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException(id);
+    public void deleteById(Long id, String currentUserEmail) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+        if (user.getEmail().equals(currentUserEmail)) {
+            throw new SelfDeletionException(id);
         }
         if (patientRepository.existsByUserId(id) || doctorRepository.existsByUserId(id)) {
             throw new UserInUseException(id);
         }
-        userRepository.deleteById(id);
+        userRepository.delete(user);
         log.info("deleted user {}", id);
     }
 }

@@ -33,6 +33,10 @@ public class Visit {
     @Version
     private Long version;
 
+    public boolean isFree() {
+        return patient == null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
