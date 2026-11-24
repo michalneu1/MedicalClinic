@@ -1,0 +1,33 @@
+meta {
+  name: Token admina
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "admin",
+    "password": "admin"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.token: isString
+  res.body.tokenType: eq Bearer
+}
+
+script:pre-request {
+  const day = new Date(Date.now() + (30 + Math.floor(Math.random() * 3000)) * 86400000);
+  bru.setVar("dzien", day.toISOString().slice(0, 10));
+}
+
+script:post-response {
+  bru.setVar("adminToken", res.body.token);
+}

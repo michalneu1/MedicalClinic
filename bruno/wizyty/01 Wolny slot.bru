@@ -1,0 +1,37 @@
+meta {
+  name: Wolny slot
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/visits
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "doctorId": {{doktorId}},
+    "startsAt": "{{dzien}}T08:00:00",
+    "endsAt": "{{dzien}}T08:30:00"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:post-response {
+  bru.setVar("wizytaId", res.body.id);
+}
+
+tests {
+  test("nowy termin jest wolny", function () {
+    expect(res.body.patientId).to.equal(null);
+  });
+}

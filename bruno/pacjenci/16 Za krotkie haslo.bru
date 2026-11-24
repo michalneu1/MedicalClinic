@@ -1,0 +1,25 @@
+meta {
+  name: Za krótkie hasło
+  type: http
+  seq: 16
+}
+
+patch {
+  url: {{baseUrl}}/patients/{{patientId}}/password
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "password": "abc"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

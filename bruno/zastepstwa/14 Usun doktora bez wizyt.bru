@@ -1,0 +1,19 @@
+meta {
+  name: Usuń doktora bez wizyt
+  type: http
+  seq: 14
+}
+
+delete {
+  url: {{baseUrl}}/doctors/{{zastepcaId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 204
+}

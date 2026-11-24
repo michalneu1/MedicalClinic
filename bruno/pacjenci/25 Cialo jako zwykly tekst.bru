@@ -1,0 +1,19 @@
+meta {
+  name: Ciało jako zwykły tekst
+  type: http
+  seq: 25
+}
+
+post {
+  url: {{baseUrl}}/patients
+  body: text
+  auth: none
+}
+
+body:text {
+  to nie jest JSON
+}
+
+assert {
+  res.status: eq 415
+}

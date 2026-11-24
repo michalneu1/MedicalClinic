@@ -1,0 +1,42 @@
+meta {
+  name: Utwórz konto
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "email": "{{noweKontoEmail}}",
+    "password": "haslo1234",
+    "role": "PATIENT"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:pre-request {
+  bru.setVar("noweKontoEmail", `konto.${Date.now()}@example.com`);
+  bru.setVar("email256", "a".repeat(244) + "@example.com");
+}
+
+script:post-response {
+  bru.setVar("kontoId", res.body.id);
+}
+
+tests {
+  test("odpowiedz nie zawiera hasla", function () {
+    expect(res.body).to.not.have.property("password");
+  });
+}

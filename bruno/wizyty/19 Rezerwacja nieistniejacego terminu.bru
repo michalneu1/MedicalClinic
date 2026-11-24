@@ -1,0 +1,19 @@
+meta {
+  name: Rezerwacja nieistniejącego terminu
+  type: http
+  seq: 19
+}
+
+patch {
+  url: {{baseUrl}}/visits/999999/book/{{pacjentWizytId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 404
+}

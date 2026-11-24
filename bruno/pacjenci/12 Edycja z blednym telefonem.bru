@@ -1,0 +1,28 @@
+meta {
+  name: Edycja z błędnym telefonem
+  type: http
+  seq: 12
+}
+
+put {
+  url: {{baseUrl}}/patients/{{patientId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "firstName": "Ewa",
+    "lastName": "Zmieniona",
+    "phoneNumber": "123",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

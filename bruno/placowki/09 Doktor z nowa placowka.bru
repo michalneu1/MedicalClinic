@@ -1,0 +1,25 @@
+meta {
+  name: Doktor z nową placówką
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/doctors/{{doktorId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+tests {
+  test("doktor ma nowa placowke", function () {
+    expect(res.body.facilities).to.include(bru.getVar("placowkaNazwa"));
+  });
+}

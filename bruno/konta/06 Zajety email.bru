@@ -1,0 +1,27 @@
+meta {
+  name: Zajęty email
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "email": "jan.kowalski@example.com",
+    "password": "haslo1234",
+    "role": "PATIENT"
+  }
+}
+
+assert {
+  res.status: eq 409
+}

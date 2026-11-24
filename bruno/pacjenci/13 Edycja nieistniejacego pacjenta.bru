@@ -1,0 +1,28 @@
+meta {
+  name: Edycja nieistniejącego pacjenta
+  type: http
+  seq: 13
+}
+
+put {
+  url: {{baseUrl}}/patients/999999
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "firstName": "Ewa",
+    "lastName": "Zmieniona",
+    "phoneNumber": "600700801",
+    "birthday": "1992-05-20"
+  }
+}
+
+assert {
+  res.status: eq 404
+}

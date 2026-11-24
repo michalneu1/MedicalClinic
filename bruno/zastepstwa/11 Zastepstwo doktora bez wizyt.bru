@@ -1,0 +1,25 @@
+meta {
+  name: Zastępstwo doktora bez wizyt
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/doctors/{{nowyDoktorId}}/substitutions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "substituteId": {{zastepcaId}}
+  }
+}
+
+assert {
+  res.status: eq 409
+}

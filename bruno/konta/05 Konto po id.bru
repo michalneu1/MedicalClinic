@@ -1,0 +1,20 @@
+meta {
+  name: Konto po id
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/users/{{kontoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.role: eq PATIENT
+}

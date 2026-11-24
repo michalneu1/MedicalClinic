@@ -1,0 +1,22 @@
+meta {
+  name: Złe hasło
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/auth/token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "admin",
+    "password": "zlehaslo"
+  }
+}
+
+assert {
+  res.status: eq 401
+}

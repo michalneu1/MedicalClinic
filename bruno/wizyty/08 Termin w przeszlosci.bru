@@ -1,0 +1,27 @@
+meta {
+  name: Termin w przeszłości
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/visits
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "doctorId": {{doktorId}},
+    "startsAt": "2020-01-14T10:00:00",
+    "endsAt": "2020-01-14T10:30:00"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

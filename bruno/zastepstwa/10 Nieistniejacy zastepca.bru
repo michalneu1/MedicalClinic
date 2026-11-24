@@ -1,0 +1,25 @@
+meta {
+  name: Nieistniejący zastępca
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/doctors/{{doktorId}}/substitutions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+body:json {
+  {
+    "substituteId": 999999
+  }
+}
+
+assert {
+  res.status: eq 404
+}

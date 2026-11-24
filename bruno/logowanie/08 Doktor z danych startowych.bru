@@ -1,0 +1,30 @@
+meta {
+  name: Doktor z danych startowych
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/doctors
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+  const doctor = res.body.find(d => d.email === "katarzyna.wrobel@example.com");
+  bru.setVar("doktorId", doctor.id);
+}
+
+tests {
+  test("jest doktor z danych startowych", function () {
+    expect(bru.getVar("doktorId")).to.be.a("number");
+  });
+}

@@ -65,6 +65,21 @@ Uwaga: dokumentacja pokazuje tylko to, co API deklaruje (adnotacje w kodzie), a 
 naprawdę robi. Jak ktoś wpisze w `@ApiResponse` zły kod, Swagger i tak go pokaże.
 To, czy API faktycznie tak działa, sprawdza kolekcja Bruno.
 
+## Kolekcja Bruno
+
+Kolekcja jest w folderze `bruno/` i działa na uruchomionej aplikacji z danymi startowymi:
+
+```
+cd bruno
+npx @usebruno/cli run --env local
+```
+
+Folder `logowanie` idzie pierwszy i zapisuje tokeny admina, pacjenta i lekarza, z których korzystają
+pozostałe foldery, więc pojedynczy folder uruchamiaj razem z nim, np.
+`npx @usebruno/cli run logowanie wizyty --env local`. Adres aplikacji bierze się ze zmiennej `baseUrl`
+w `environments/local.bru`. Kolekcję można puszczać wielokrotnie na tej samej bazie: e-maile, nazwy
+i daty terminów są losowane przy każdym uruchomieniu.
+
 ## Baza danych
 
 Schemat bazy tworzy Liquibase (`src/main/resources/liquibase-changelog`). Changesety mają

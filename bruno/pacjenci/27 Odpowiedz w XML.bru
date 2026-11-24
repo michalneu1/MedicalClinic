@@ -1,0 +1,23 @@
+meta {
+  name: Odpowiedź w XML
+  type: http
+  seq: 27
+}
+
+get {
+  url: {{baseUrl}}/patients/{{patientId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Accept: application/xml
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 406
+}

@@ -1,0 +1,19 @@
+meta {
+  name: Doktor po usunięciu
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/doctors/{{zastepcaId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 404
+}

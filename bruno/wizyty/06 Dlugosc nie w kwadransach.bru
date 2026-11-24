@@ -1,0 +1,27 @@
+meta {
+  name: Długość nie w kwadransach
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/visits
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "doctorId": {{doktorId}},
+    "startsAt": "{{dzien}}T09:00:00",
+    "endsAt": "{{dzien}}T09:20:00"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

@@ -1,0 +1,35 @@
+meta {
+  name: Utwórz konto doktora
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "email": "{{kontoDoktoraEmail}}",
+    "password": "haslo1234",
+    "role": "DOCTOR"
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+script:pre-request {
+  bru.setVar("kontoDoktoraEmail", `tomasz.dermatolog.${Date.now()}@example.com`);
+}
+
+script:post-response {
+  bru.setVar("kontoDoktoraId", res.body.id);
+}

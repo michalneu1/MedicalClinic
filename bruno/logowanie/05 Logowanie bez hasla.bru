@@ -1,0 +1,21 @@
+meta {
+  name: Logowanie bez hasła
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/auth/token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "admin"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

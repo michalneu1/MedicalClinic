@@ -1,0 +1,19 @@
+meta {
+  name: Sortowanie po niedozwolonym polu
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/visits?sort=doctor
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{pacjentToken}}
+}
+
+assert {
+  res.status: eq 400
+}

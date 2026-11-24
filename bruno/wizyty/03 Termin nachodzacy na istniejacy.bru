@@ -1,0 +1,27 @@
+meta {
+  name: Termin nachodzący na istniejący
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/visits
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "doctorId": {{doktorId}},
+    "startsAt": "{{dzien}}T08:15:00",
+    "endsAt": "{{dzien}}T08:45:00"
+  }
+}
+
+assert {
+  res.status: eq 409
+}

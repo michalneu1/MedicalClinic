@@ -1,0 +1,26 @@
+meta {
+  name: Lista kont
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/users
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+assert {
+  res.status: eq 200
+}
+
+script:post-response {
+  const jan = res.body.find(u => u.email === "jan.kowalski@example.com");
+  bru.setVar("janKontoId", jan.id);
+  const admin = res.body.find(u => u.email === "admin");
+  bru.setVar("adminKontoId", admin.id);
+}
